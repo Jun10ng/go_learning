@@ -49,7 +49,7 @@ if summer == nil { /* ... */ }
 *First, unlike array elements, the elements
 of a slice are indirect, making it possible for **a slice to contain itself**. Although there are ways to deal with such cases, none is simple, efficient, and most importantly, obvious.*
 
-我一直不清楚什么叫 **切片有可包含它自己** ，于是我就谷歌了，以下是我的整理。
+我一直不清楚什么叫 **切片有可能包含它自己** ，于是我就谷歌了，以下是我的整理。
 
 * 证明一：
 
@@ -102,7 +102,7 @@ of a slice are indirect, making it possible for **a slice to contain itself**. A
 	fmt.Println(s3)
 ```
 
-
+因此用interface{} 来承接一个其他数据类型的数组也是一个**深拷贝数组**的奇门巧技。
 
 ### 测试 slice 是否为空
 
