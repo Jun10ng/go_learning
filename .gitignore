@@ -4,6 +4,7 @@
 
 # IntelliJ project files
 .idea
+.test_code
 *.iml
 out
 gen
@@ -102,3 +103,4 @@ fabric.properties
 *.iml
 out
 gen
+/test_code/
