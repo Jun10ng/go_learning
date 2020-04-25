@@ -220,3 +220,232 @@ if yv, ok := y[k]; ok{
 map[string]bool
 ```
 
+## Struct
+
+
+
+### 初始化
+
+以下三个语句是相等的
+
+```go
+pp := &Point{1, 2}
+pp := new(Point)
+*pp = Point{1, 2}
+```
+
+
+
+### 结构体不能包含自身类型的成员，但是可以包含类型指针
+
+一个命名为S的结构体类型将不能再包含S类型的成员：因为一个**聚合体**不能包含它自身。（该限制同样适用于数组。）但是S类型的结构体可以包含`*S`指针类型的成员，这可以让我们创建递归的数据结构，比如**链表和树结构**等。
+
+### 使用go mod导入自定义包
+
+文件结构如下：
+
+```
+test_code
+	│  go.mod
+	│
+	├─p
+	│      p_struct.go
+	│
+	└─q
+            q_test.go
+            q_use.go
+
+```
+
+各文件内容
+
+```go
+// p_struct.go
+package p
+
+type Point struct{
+	X int
+	Y int
+}
+
+//q_use.go
+package q
+
+import (
+	"fmt"
+	"test_code/p"
+)
+
+func q_use()  {
+	p := &p.Point{1,2}
+	fmt.Printf("x:%v\ty:%v",p.X,p.Y)
+}
+
+
+//go.mod
+//最重要的文件、
+module test_code
+
+go 1.14
+
+```
+
+要在 q_use.go 文件中使用 p_struct.go 中的结构体。
+
+在 go.mod 文件中，将 test_code声明为一个模块，然后在 q_use中就可以导入 test_code 下的 p_struct文件了。
+
+注意了，一个项目中，不同文件夹都可以有go.mod ，就行一个大工程是很多小模块组成的。
+
+### 结构体的函数传值与返回
+
+在go中，尽量使用指针来传递结构体。有以下两个好处。
+
+1. 指针比结构体本身小，使得效率高
+2. go中，都是值传递，也就是拷贝体，所以如果希望目标结构体被处理修改，请使用指针传值。
+
+### 结构体的比较
+
+如果结构体的全部成员都是可以比较的，那么结构体也是可以比较的，直接使用 `==``和！=`。所以可比较的结构体可以用于 `map`的 `key`类型。**不可比较的数据类型包括，Slice, Map, 和函数**
+
+### 匿名成员
+
+为了避免，结构体套结构体，而导致的**过多间接访问**。如：
+
+```go
+w.Circle.Center.X = 8
+w.Circle.Center.Y = 8
+```
+
+Go语言有一个特性让我们只声明一个成员对应的数据类型而不指名成员的名字；这类成员就叫**匿名成员**。匿名成员的数据类型必须是**命名的类型或指向一个命名的类型的指针**。下面的代码中，Circle 和Wheel 各自都有一个匿名成员。我们可以说Point类型被嵌入到了Circle结构体，同时Circle类型被嵌入到了Wheel结构体。
+
+得益于匿名嵌入的特性，我们可以**直接访问叶子属性而不需要给出完整的路径**：
+
+```
+type Circle struct {
+	Point   //匿名成员
+	Radius int
+}
+
+type Wheel struct {
+	Circle  ////匿名成员
+	Spokes int
+}
+
+var w Wheel
+w.X = 8            // equivalent to w.Circle.Point.X = 8
+w.Y = 8            // equivalent to w.Circle.Point.Y = 8
+w.Radius = 5       // equivalent to w.Circle.Radius = 5
+w.Spokes = 20
+```
+
+匿名成员的作用，**简单来说就是方便，加快了效率，让代码更直观了**。专业的说法是： **对访问嵌套成员的点运算符提供了简短的语法糖**
+
+## JSON
+
+JavaScript对象表示法（JSON）是一种用于发送和接收结构化信息的标准协议。在类似的协议中，JSON并不是唯一的一个标准协议。 XML（§7.14）、ASN.1和Google的Protocol Buffers都是类似的协议，并且有各自的特色，但是由于简洁性、可读性和流行程度等原因，JSON是应用最广泛的一个。
+
+### 结构体转 JSON
+
+这样的数据结构特别适合JSON格式，并且在两者之间相互转换也很容易。将一个Go语言中类似movies的结构体slice转为JSON的过程叫**编组（marshaling）**。编组通过调用json.Marshal函数完成：
+
+```go
+type Movie struct {
+	Title  string
+	Year   int  `json:"released"`
+	Color  bool `json:"color,omitempty"`
+	Actors []string
+}
+
+var movies = []Movie{
+	{Title: "Casablanca", Year: 1942, Color: false,
+		Actors: []string{"Humphrey Bogart", "Ingrid Bergman"}},
+	{Title: "Cool Hand Luke", Year: 1967, Color: true,
+		Actors: []string{"Paul Newman"}},
+	{Title: "Bullitt", Year: 1968, Color: true,
+		Actors: []string{"Steve McQueen", "Jacqueline Bisset"}},
+	// ...
+}
+```
+
+编组代码
+
+```go
+data, err := json.Marshal(movies)
+if err != nil {
+	log.Fatalf("JSON marshaling failed: %s", err)
+}
+fmt.Printf("%s\n", data)
+```
+
+Marshal函数返回一个编码后的字节slice，包含很长的字符串，并且没有空白缩进；我们将它折行以便于显示：
+
+```
+[{"Title":"Casablanca","released":1942,"Actors":["Humphrey Bogart","Ingr
+id Bergman"]},{"Title":"Cool Hand Luke","released":1967,"color":true,"Ac
+tors":["Paul Newman"]},{"Title":"Bullitt","released":1968,"color":true,"
+Actors":["Steve McQueen","Jacqueline Bisset"]}]
+```
+
+为了生成**便于阅读**的格式，另一个**json.MarshalIndent**函数将产生整齐缩进的输出。该函数有两个额外的字符串参数用于表示每一行输出的前缀和每一个层级的缩进：
+
+```go
+data, err := json.MarshalIndent(movies, "", "	")
+```
+
+
+
+```json
+[
+	{
+		"Title": "Casablanca",
+		"released": 1942,
+		"Actors": [
+			"Humphrey Bogart",
+			"Ingrid Bergman"
+		]
+	},
+	{
+		"Title": "Cool Hand Luke",
+		"released": 1967,
+		"color": true,
+		"Actors": [
+			"Paul Newman"
+		]
+	},
+	{
+		"Title": "Bullitt",
+		"released": 1968,
+		"color": true,
+		"Actors": [
+			"Steve McQueen",
+			"Jacqueline Bisset"
+		]
+	}
+]
+```
+
+### 结构体成员 Tag
+
+其中Year名字的成员在编码后变成了released，还有Color成员编码后变成了小写字母开头的color。这是因为结构体成员Tag所导致的。一个结构体成员Tag是和在编译阶段关联到该成员的元信息字符串：
+
+```
+Year  int  `json:"released"`
+Color bool `json:"color,omitempty"`
+```
+
+Color成员的Tag还带了一个额外的**omitempty**选项，表示当Go语言结构体成员为空或零值时不生成该JSON对象（这里false为零值）。果然，Casablanca是一个黑白电影，并没有输出Color成员。
+
+### 解码
+
+Go语言中一般叫**unmarshaling**，通过**json.Unmarshal**函数完成。下面的代码将JSON格式的电影数据解码为一个结构体slice，结构体中只有Title成员。通过定义合适的Go语言数据结构，我们可以**选择性**地解码JSON中感兴趣的成员。当Unmarshal函数调用返回，slice将被只含有Title信息的值填充，其它JSON成员将被忽略。
+
+以下代码将 把 movies 切片中所有元素的 Title 成员解码，注意，Unmarshal函数只返回一个error，**真正的数据要用指针数值的形式传值，见第二个参数**
+
+```
+var titles []struct{ Title string }
+if err := json.Unmarshal(data, &titles); err != nil {
+	log.Fatalf("JSON unmarshaling failed: %s", err)
+}
+fmt.Println(titles) // "[{Casablanca} {Cool Hand Luke} {Bullitt}]"
+```
+
