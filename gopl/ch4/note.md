@@ -463,3 +463,19 @@ if err := json.Unmarshal(data, &titles); err != nil {
 fmt.Println(titles) // "[{Casablanca} {Cool Hand Luke} {Bullitt}]"
 ```
 
+## 文本和HTML模板
+
+```go
+const templ = `{{.TotalCount}} issues:
+{{range .Items}}----------------------------------------
+Number: {{.Number}}
+User:   {{.User.Login}}
+Title:  {{.Title | printf "%.64s"}}
+Age:    {{.CreatedAt | daysAgo}} days
+{{end}}`
+```
+
+如上代码中，"."代表当前值，当前值“.”最初被初始化为调用模板时的参数，在当前例子中对应`github.IssuesSearchResult`类型的变量。
+
+在一个action中，`|`操作符表示将前一个表达式的结果作为后一个函数的输入，类似于UNIX中管道的概念。在Title这一行的action中，第二个操作是一个printf函数，是一个基于fmt.Sprintf实现的内置函数，所有模板都可以直接使用。
+
