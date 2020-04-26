@@ -1,71 +1,90 @@
 package ex4_13
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
-	"path/filepath"
-	""
+	"strings"
+	"sync"
 )
 
-const APIURL = "http://www.omdbapi.com/?"
+const apikey = "837a1b8b"
+const apiUrl = "http://www.omdbapi.com/"
 
-type Movie struct {
+type moveInfo struct {
 	Title  string
 	Year   string
 	Poster string
 }
 
-func (m Movie) posterFilename() string {
-	ext := filepath.Ext(m.Poster)
-	title := slugify.Marshal(m.Title)
-	return fmt.Sprintf("%s_(%s)%s", title, m.Year, ext)
-}
-
-func getMovie(title string) (movie Movie, err error) {
-	url_ := fmt.Sprintf("%st=%s", APIURL, url.QueryEscape(title))
-	resp, err := http.Get(url_)
+//福尔摩斯
+// OMDb API: http://www.omdbapi.com/?t=Holmes&apikey=837a1b8b
+func getPoster(title string) {
+	resp, err := http.Get(fmt.Sprintf("%s?t=%s&apikey=%s", apiUrl, url.QueryEscape(title), apikey))
 	if err != nil {
+		fmt.Println(err)
 		return
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode != 200 {
-		err = fmt.Errorf("%d response from %s", resp.StatusCode, url_)
-		return
-	}
-	err = json.NewDecoder(resp.Body).Decode(&movie)
-	if err != nil {
-		return
-	}
-	return
-}
 
-func (m Movie) writePoster() error {
-	url_ := m.Poster
-	resp, err := http.Get(url_)
+	binfo, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return err
+		fmt.Println(err)
+		return
+	}
+	minfo := moveInfo{}
+	err = json.Unmarshal(binfo, &minfo)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	poster := minfo.Poster
+	if poster != "" {
+		downloadPoster(poster)
+	}
+}
+func downloadPoster(url string) {
+	resp, err := http.Get(url)
+	if err != nil {
+		fmt.Println(err)
+		return
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode != 200 {
-		return fmt.Errorf("%d response from %s", resp.StatusCode, url_)
-	}
-	file, err := os.Create(m.posterFilename())
+
+	bcontent, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return err
+		fmt.Println(err)
+		return
 	}
-	defer file.Close()
-	writer := bufio.NewWriter(file)
-	_, err = writer.ReadFrom(resp.Body)
+	pos := strings.LastIndex(url, "/")
+	if pos == -1 {
+		fmt.Println("failed to parse the title of the poster")
+		return
+	}
+	f, err := os.Create(url[pos+1:])
 	if err != nil {
-		return err
+		fmt.Println(err)
+		return
 	}
-	err = writer.Flush()
+	defer f.Close()
+
+	_, err = f.Write(bcontent)
 	if err != nil {
-		return err
+		fmt.Println(err)
 	}
-	return nil
 }
+func searchByTitle(titles ...string) {
+	var wg sync.WaitGroup
+	for _, title := range titles {
+		wg.Add(1)
+		go func() {
+			getPoster(title)
+			wg.Done()
+		}()
+	}
+	wg.Wait()
+}
+
