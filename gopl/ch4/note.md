@@ -31,7 +31,7 @@ func Equal(a, b []byte) bool {
 
 ### 为什么不支持两个 slice 相比呢？
 
-1. 一个slice的元素是间接引用的，一个slice甚至可以包含自身。虽然有很多办法处理这种情形，但是没有一个是简单有效的。
+1. 一个slice的元素是间接引用的，一个slice甚至可以包含自身（当 slice类型是 `[]interface{}`)。虽然有很多办法处理这种情形，但是没有一个是简单有效的。
 2. 第二个原因，因为slice的元素是间接引用的，一个固定的slice值(译注：指slice本身的值，不是元素的值)在不同的时刻可能包含不同的元素，因为底层数组的元素可能会被修改。而例如Go语言中map的key只做简单的浅拷贝，它要求key在整个生命周期内保持不变性(译注：例如slice扩容，就会导致其本身的值/地址变化)。而用深度相等判断的话，显然在map的key这种场合不合适。对于像指针或chan之类的引用类型，==相等测试可以判断两个是否是引用相同的对象。一个针对slice的浅相等测试的==操作符可能是有一定用处的，也能临时解决map类型的key问题，但是slice和数组不同的相等测试行为会让人困惑。因此，安全的做法是直接禁止slice之间的比较操作。
 
 slice唯一合法的比较操作是和nil比较，例如：
@@ -86,7 +86,7 @@ of a slice are indirect, making it possible for **a slice to contain itself**. A
 
 #### 为什么数组就不会包含自身
 
-```
+```go
 	//当s被放入[]inteface{}时，会创建一个副本
 	//所以已经不是自身了
 	s := [2]interface{}{"one", nil}
@@ -103,6 +103,20 @@ of a slice are indirect, making it possible for **a slice to contain itself**. A
 ```
 
 因此用interface{} 来承接一个其他数据类型的数组也是一个**深拷贝数组**的奇门巧技。
+
+### slice如何比较
+
+- `reflect`比较的方法
+
+  ```go
+  func StringSliceReflectEqual(a, b []string) bool {
+      return reflect.DeepEqual(a, b)
+  }
+  ```
+
+- 循环遍历比较的方法
+
+
 
 ### 测试 slice 是否为空
 
