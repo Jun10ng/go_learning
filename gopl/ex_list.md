@@ -29,3 +29,7 @@
 
 **练习 4.14：** 创建一个web服务器，查询一次GitHub，然后生成BUG报告、里程碑和对应的用户信息。
 
+#### 函数
+**练习 5.1： **修改findlinks代码中遍历n.FirstChild链表的部分，将循环调用visit，改成递归调用。
+**练习 5.5： **实现countWordsAndImages。（参考练习4.9如何分词）
+**练习5.19： ** 使用panic和recover编写一个不包含return语句但能返回一个非零值的函数。

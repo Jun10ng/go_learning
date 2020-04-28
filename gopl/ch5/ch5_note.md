@@ -1,3 +1,5 @@
+
+
 # ch5_note
 
 ## 函数声明
@@ -263,3 +265,250 @@ func topoSort(m map[string][]string) []string  {
 }
 ```
 
+## 闭包包了什么
+
+闭包/Closure 在维基百科中的解释为：
+
+*是引用了自由变量的函数。这个被引用的自由变量将和这个函数一同存在，即使已经离开了创造它的环境也不例外。所以，有另一种说法认为闭包是由函数和与其相关的引用环境组合而成的实体。*
+
+### 语法糖与设计模式
+
+闭包实际上就是一种语法糖机制，而这种语法糖机制可以简化编程，从而可以提高代码的**可读性**。
+
+比如，有时候对外部的局部变量进行访问，没这种语法糖机制将会编写冗余的代码。而这正也是可以把这种闭包机制归结为一种**设计模式**。
+
+这种设计模式的好处就是可以很轻易的访问一个函数的内部的局部变量，再简单点就是通过函数嵌套的方式，闭包可以很轻易的实现函数**内部和外部之间的连接**。
+
+我们知道函数是一段可执行代码，编译后就失效了，而这些函数在编译时就确定了，在执行时，不会发生变化，每个函数在内存中只有一份实例。而闭包并且在执行时候根据不同的引用变量和函数组合起来可以发生变化，也就意味着可以**产生多个实例**。还有一个好处就是函数调用结束时就会自动失效，而闭包的好处就是可以**让这些变量始终保持在内存中**，不会随着函数的调用而消失。
+
+### 函数值
+
+Go语言中不允许函数嵌套定义，但是可以用匿名函数来实现嵌套。在这里就得知道，在Go语言中，函数也是一种类型，这意味着可以把**函数当成一个值**来传递和返回。函数既可以作为一种返回类型又可以作为其他函数的参数。所以，这样**很容易使用函数类型来实现闭包**。
+
+```go
+//如果写成
+//var visitAll  func(items []string){...} 报错
+
+var visitAll  func(items []string)
+	visitAll = func(items []string){//匿名函数
+		for _,item := range items{
+			if !visited[item] {
+				visited[item] = true
+				visitAll(m[item])
+				//递归入栈
+				order = append(order,item)
+			}
+		}
+	}
+
+
+```
+
+### 闭包包了什么？
+
+包了**函数**和**环境**，
+
+函数指外部函数的**内部函数**。环境指闭包保存/记录了它产生时的**外部函数的所有环境。**
+
+看一个例子：
+
+```
+func foo(x int) func() {
+	return func() {
+		x = x + 1
+		fmt.Printf("foo2 val = %d\n", x)
+	}
+}
+```
+
+环境就是指内部函数（匿名函数）用到的不属于它的变量`x`。
+
+### 闭包延迟绑定
+
+**在执行的时候去外部环境寻找最新的数值**，
+
+```go
+func foo(x int) []func() {
+    var fs []func()
+    values := []int{1, 2, 3, 5}
+    val:=0
+    for _, val = range values {
+        fs = append(fs, func() {
+            fmt.Printf("foo val = %d\n", x+val)
+        })
+    }
+    //val:=11
+    return fs
+}
+// Q4实验：
+fs := foo(11)
+for _, f := range fs {
+    f()
+}
+```
+
+输出：
+
+```
+foo val = 16
+foo val = 16
+foo val = 16
+foo val = 16
+```
+
+这就是所谓的 **闭包延迟绑定**，就是指，闭包虽然包了环境，但是包的是最新的值，当真正运行闭包函数的时候，函数再去环境找值，所以采用的上述例子中，闭包函数中的 `val`一直是5。如果我们把函数中注释掉的那句 `val = 11`那么输出的就会是22了。
+
+## defer
+
+你只需要在调用普通函数或方法前加上关键字defer，就完成了defer所需要的语法。
+
+当defer语句被执行时，跟在defer后面的函数会被延迟执行。在该函数执行完毕后，defer语句才会执行（理解为把defer语句**压入栈底**，最后执行，**在return语句更新返回值变量后再执行**）。不论该函数是通过return正常结束，还是由于panic导致的异常结束。你可以在一个函数中执行多条defer语句，它们的执行顺序与声明顺序相反。
+
+defer语句经常被用于处理成对的操作，如打开、关闭、连接、断开连接、加锁、释放锁。通过defer机制，不论函数逻辑多复杂，都能保证在任何执行路径下，资源被释放。**释放资源的defer应该直接跟在请求资源的语句后**。
+
+连接
+
+```go
+ resp, err := http.Get(url)
+    if err != nil {
+        return err
+    }
+    defer resp.Body.Close()
+```
+文件
+```go
+ f, err := os.Open(filename)
+    if err != nil {
+        return nil, err
+    }
+    defer f.Close()
+```
+锁
+```go
+var mu sync.Mutex
+var m = make(map[string]int)
+func lookup(key string) int {
+    mu.Lock()
+    defer mu.Unlock()
+    return m[key]
+}
+```
+
+### defer+闭包
+
+对匿名函数采用defer机制，可以使其观察函数的返回值。
+
+```go
+func double(x int) (result int) {
+    defer func() { fmt.Printf("double(%d) = %d\n", x,result) }()
+    return x + x
+}
+_ = double(4)
+```
+
+可能doulbe函数过于简单，看不出这个小技巧的作用，但对于有许多return语句的函数而言，这个技巧**很有用**。
+
+被延迟执行的匿名函数甚至可以**修改**返回值：
+
+```go
+func triple(x int) (result int) {
+    defer func() { result += x }()
+    return double(x)
+}
+fmt.Println(triple(4)) // "12"
+```
+
+### 注意点
+
+#### 循环体的defer
+
+在**循环体中的defer语句**需要特别注意，因为只有在函数执行完毕后，这些被延迟的函数才会执行（而不是循环体结束）。下面的代码会导致系统的文件描述符耗尽，因为在所有文件都被处理之前，没有文件会被关闭。
+
+```go
+for _, filename := range filenames {
+    f, err := os.Open(filename)
+    if err != nil {
+        return err
+    }
+    defer f.Close() // NOTE: risky; could run out of file
+    descriptors
+    // ...process f…
+}
+```
+
+**解决办法**：
+
+将循环体中的defer语句移至另外一个函数。在每次循环时，调用这个函数。
+
+```go
+for _, filename := range filenames {
+    if err := doFile(filename); err != nil {
+        return err
+    }
+}
+func doFile(filename string) error {
+    f, err := os.Open(filename)
+    if err != nil {
+        return err
+    }
+    defer f.Close()
+    // ...process f…
+}
+```
+
+#### 文件系统的延迟错误反馈
+
+许多文件系统会把写入操作的错误延迟到关闭文件时再反馈，这样会导致我们我以为写入操作成功。
+
+```Go
+// Fetch downloads the URL and returns the
+// name and length of the local file.
+func fetch(url string) (filename string, n int64, err error) {
+    resp, err := http.Get(url)
+    if err != nil {
+        return "", 0, err
+    }
+    defer resp.Body.Close()
+    local := path.Base(resp.Request.URL.Path)
+    if local == "/" {
+        local = "index.html"
+    }
+    f, err := os.Create(local)
+    if err != nil {
+        return "", 0, err
+    }
+    n, err = io.Copy(f, resp.Body)
+    // Close file, but prefer error from Copy, if any.
+    if closeErr := f.Close(); err == nil {
+        err = closeErr
+    }
+    return local, n, err
+}
+```
+
+上例中，通过os.Create打开文件进行写入，在关闭文件时，我们没有对f.close采用defer机制，因为这会产生一些微妙的错误。**许多文件系统，尤其是NFS，写入文件时发生的错误会被延迟到文件关闭时反馈。如果没有检查文件关闭时的反馈信息，可能会导致数据丢失，而我们还误以为写入操作成功。**如果io.Copy和f.close都失败了，我们倾向于将**io.Copy的错误信息反馈给调用者，因为它先于f.close发生，更有可能接近问题的本质**。
+
+## panic
+
+不是所有的panic异常都来自运行时，直接调用内置的panic函数也会引发panic异常；panic函数接受任何值作为参数。当某些不应该发生的场景发生时，我们就应该调用panic。比如，当程序**到达了某条逻辑上不可能到达的路径**：
+
+```
+switch s := suit(drawCard()); s {
+    case "Spades":                                // ...
+    case "Hearts":                                // ...
+    case "Diamonds":                              // ...
+    case "Clubs":                                 // ...
+    default:
+        panic(fmt.Sprintf("invalid suit %q", s)) // Joker?
+}
+```
+
+### Recover
+
+当web服务器遇到不可预料的严重问题时，在崩溃前应该将所有的连接关闭；如果不做任何处理，会使得客户端一直处于等待状态。如果web服务器还在开发阶段，服务器甚至可以将异常信息反馈到客户端，帮助调试。
+
+如果在deferred函数中调用了内置函数recover，并且定义该defer语句的函数发生了panic异常，recover会使程序从panic中恢复，并返回panic value。导致panic异常的函数不会继续运行，但能正常返回。在未发生panic时调用recover，recover会返回nil。
+
+**有时我们很难完全遵循规范**，举个例子，net/http包中提供了一个web服务器，将收到的请求分发给用户提供的处理函数。很显然，我们不能因为某个处理函数引发的panic异常，杀掉整个进程；web服务器遇到处理函数导致的panic时会调用recover，输出堆栈信息，继续运行。这样的做法在实践中很便捷，但也会引起资源泄漏，或是因为recover操作，导致其他问题。
+
+**基于以上原因，安全的做法是有选择性的recover。换句话说，只恢复应该被恢复的panic异常，此外，这些异常所占的比例应该尽可能的低。**为了标识某个panic是否应该被恢复，我们可以将panic value设置成特殊类型。在recover时对panic value进行检查，如果发现panic value是特殊类型，就将这个panic作为errror处理，如果不是，则按照正常的panic进行处理（在下面的例子中，我们会看到这种方式）。
