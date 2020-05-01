@@ -33,3 +33,16 @@
 **练习 5.1： **修改findlinks代码中遍历n.FirstChild链表的部分，将循环调用visit，改成递归调用。
 **练习 5.5： **实现countWordsAndImages。（参考练习4.9如何分词）
 **练习5.19： ** 使用panic和recover编写一个不包含return语句但能返回一个非零值的函数。
+
+#### 方法
+**练习6.1:** 为bit数组实现下面这些方法
+
+```go
+func (*IntSet) Len() int      // return the number of elements
+func (*IntSet) Remove(x int)  // remove x from the set
+func (*IntSet) Clear()        // remove all elements from the set
+func (*IntSet) Copy() *IntSet // return a copy of the set
+```
+
+**练习 6.2：** 定义一个变参方法(*IntSet).AddAll(...int)，这个方法可以添加一组IntSet，比如s.AddAll(1,2,3)。
+**练习 6.3：** (*IntSet).UnionWith会用`|`操作符计算两个集合的并集，我们再为IntSet实现另外的几个函数IntersectWith（交集：元素在A集合B集合均出现），DifferenceWith（差集：元素出现在A集合，未出现在B集合），SymmetricDifference（并差集：元素出现在A但没有出现在B，或者出现在B没有出现在A）。
