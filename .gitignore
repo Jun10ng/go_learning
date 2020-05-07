@@ -104,3 +104,7 @@ fabric.properties
 out
 gen
 /test_code/
+
+# vscode
+.vscode
+/.vscode/
