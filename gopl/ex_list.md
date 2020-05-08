@@ -72,4 +72,16 @@ func (*IntSet) Copy() *IntSet // return a copy of the set
 
 #### 接口
 
-**7-1** 使用来自ByteCounter的思路，实现一个针对单词和行数的计数器。你会发现bufio.ScanWords非常的有用
+***练习7-1** 使用来自ByteCounter的思路，实现一个针对单词和行数的计数器。你会发现bufio.ScanWords非常的有用
+
+**练习 7.2：** 写一个带有如下函数签名的函数CountingWriter，传入一个io.Writer接口类型，返回一个把原来的Writer封装在里面的新的Writer类型和一个表示新的写入字节数的int64类型指针。
+
+```go
+func CountingWriter(w io.Writer) (io.Writer, *int64)
+```
+
+**练习 7.5：** io包里面的LimitReader函数接收一个io.Reader接口类型的r和字节数n，并且返回另一个从r中读取字节但是当读完n个字节后就表示读到文件结束的Reader。实现这个LimitReader函数：
+
+``` go
+func LimitReader(r io.Reader, n int64) io.Reader
+```
