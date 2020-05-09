@@ -57,4 +57,31 @@ type Closer interface {
     Close() error
 }
 ```
-  
+
+## T 与 *T
+
+对于每一个命名过的具体类型T；它的一些方法的接收者是类型T本身，而另一些接受者则是`*T`的指针。
+在T类型的变量上调用一个`*T`的方法是合法的，只要这个参数是一个变量；编译器隐式的获取了它的地址。但这仅仅是一个语法糖：T类型的值不拥有所有`*T`指针的方法，这样它就可能只实现了更少的接口。
+
+看下面的例子：
+
+```go
+type IntSet struct { /* ... */ }
+func (*IntSet) String() string
+var _ = IntSet{}.String() // compile error: String requires *IntSet receiver
+//while
+var s IntSet
+var _ = s.String() // OK: s is a variable and &s has a String method
+```
+
+**（这十分巧妙）**通过接口赋值我们还可以限制一个具体类暴露出来的方法，这可以用来完成权限设置。
+
+```go
+os.Stdout.Write([]byte("hello")) // OK: *os.Stdout实现了Writer接口
+os.Stdout.Close()                // OK: *os.Stdout实现了Closer接口
+
+var w io.Writer
+w = os.Stdout            // 用Writer接口的w变量赋值
+w.Write([]byte("hello")) // OK: 有Writer接口
+w.Close()                // compile error: Closer接口已经被屏蔽掉了,close方法自然被屏蔽了
+```

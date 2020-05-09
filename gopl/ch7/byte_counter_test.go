@@ -14,3 +14,5 @@ func TestByteCounter(t *testing.T) {
 	fmt.Fprintf(&c, "hello,%s", name)
 	fmt.Println(c)
 }
+
+
