@@ -1,6 +1,19 @@
 
 # ch7_note
+<!-- TOC -->
 
+- [ch7_note](#ch7_note)
+    - [fmt.Fprintf](#fmtfprintf)
+    - [T 与 *T](#t-与-t)
+    - [接口的比较](#接口的比较)
+        - [如何获得接口类型信息](#如何获得接口类型信息)
+        - [包含nil指针的接口和nil接口](#包含nil指针的接口和nil接口)
+    - [重要接口介绍](#重要接口介绍)
+        - [排序接口](#排序接口)
+    - [http.Handler接口](#httphandler接口)
+        - [简化url与hander的分配关系](#简化url与hander的分配关系)
+
+<!-- /TOC -->
 ## fmt.Fprintf
 
 实际上，`fmt.Printf`和`fmt.Sprintf`都是对`fmt.Fprintf`的封装。
