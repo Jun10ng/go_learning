@@ -12,6 +12,9 @@
         - [排序接口](#排序接口)
     - [http.Handler接口](#httphandler接口)
         - [简化url与hander的分配关系](#简化url与hander的分配关系)
+    - [断言](#断言)
+        - [使用接口来判别错误类型](#使用接口来判别错误类型)
+        - [使用类型断言判断行为](#使用类型断言判断行为)
 
 <!-- /TOC -->
 ## fmt.Fprintf
@@ -390,3 +393,73 @@ func main() {
 }
 ```
 
+## 断言
+
+
+类型断言有两种方式。他们的代码都是`x.(T)`，无论哪种情况下，**x都必须是一个接口！先声明接口，再给x赋值**
+
+第一种，**如果T是一个具体类型**，那么，`f = x.(T)` 就是把一个接口x转化成T具体类型。但是前提是T实现了接口x。如：
+
+```go
+	var w io.Writer
+	w = os.Stdout
+	f := w.(*os.File)      // success: f == os.Stdout
+	c := w.(*bytes.Buffer) // panic: interface holds *os.File, not *bytes.Buffer
+```
+
+第二种与第一种相反，**T是一个接口类型**，那么, x.(T)则会返回x的T接口的动态类型,f中不在具备x内除了T接口外的其他方法，
+
+```go
+var w io.Writer
+w = os.Stdout
+f := w.(*os.File)      // success: f == os.Stdout
+c := w.(*bytes.Buffer) // panic: interface holds *os.File, not *bytes.Buffer
+```
+
+这两种都是吧x转换成其子集，（子类型或者子接口）
+断言失败一般会导致panic的，所以在断言前，我们需要判断断言**一个变量是否为特定类型**，这也可以用断言来实现
+
+```go
+if w, ok := w.(*os.File); ok {
+	// ...use w...
+}
+```
+
+### 使用接口来判别错误类型
+
+在os包内，有三个方法，他们被用来判断错误的类型，其底层实现是判断错误中是否包含特定的字符串。
+
+
+```go
+package os
+
+func IsExist(err error) bool
+func IsNotExist(err error) bool
+func IsPermission(err error) bool
+```
+
+使用案例，打开一个文件，期间发生了错误，我们要判断这个错误是什么？然后交给程序尝试自主解决。
+
+```go
+_, err := os.Open("/no/such/file")
+fmt.Println(os.IsNotExist(err)) // "true"
+```
+
+### 使用类型断言判断行为
+
+类型断言还可以用来判断某个类有没有特定的方法。
+比如我们需要判断一个类型是否有writeString方法，我们可以像下面这样写：在函数内创建一个临时的接口，然后用类型断言，如果失败的话再说。**这是一种很巧妙的做法，灵活的使用到了接口和断言。**
+
+```go
+// writeString writes s to w.
+// If w has a WriteString method, it is invoked instead of w.Write.
+func writeString(w io.Writer, s string) (n int, err error) {
+	type stringWriter interface {
+		WriteString(string) (n int, err error)
+	}
+	if sw, ok := w.(stringWriter); ok {
+		return sw.WriteString(s) // avoid a copy
+	}
+	return w.Write([]byte(s)) // allocate temporary copy
+}
+```
