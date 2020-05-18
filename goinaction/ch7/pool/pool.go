@@ -40,6 +40,10 @@ func New(fn func()(io.Closer,error),size uint)(* Pool,error){
 
 // Acquire 从池中获取一个资源
 func (p *Pool)Acquire() (io.Closer,error) {
+		/* 
+	这个实现是通过 select/case 语句来检
+	查有缓冲的通道里是否还有资源来完成的。如果通道里还有资源，就取出这个资源，并返回给调用者。如果该通道里没有资源可取，就会执行 default 分支。在这个示例中，在第 54 行执行用户提供的工厂函数，并且创建并返回一个新资源
+	*/
 	select{
 	case r,ok := <-p.resources:
 		log.Println("Acquire:","Shared Resource")
@@ -66,10 +70,7 @@ func (p *Pool) Release(r io.Closer) {
 		return 
 	}
 
-	/* 
-	这个实现是通过 select/case 语句来检
-	查有缓冲的通道里是否还有资源来完成的。如果通道里还有资源，就取出这个资源，并返回给调用者。如果该通道里没有资源可取，就会执行 default 分支。在这个示例中，在第 54 行执行用户提供的工厂函数，并且创建并返回一个新资源
-	*/
+
 	select{
 		// 试图将这个资源放入队列
 	case p.resources <- r:
