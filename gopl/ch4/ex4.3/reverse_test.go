@@ -5,8 +5,8 @@ import (
 	"testing"
 )
 
-func TestReverse(t *testing.T)  {
-	origin := [...]int{0,1,2,3,4}
+func TestReverse(t *testing.T) {
+	origin := [...]int{0, 1, 2, 3, 4}
 	reverse(&origin)
 	fmt.Println(origin)
 }

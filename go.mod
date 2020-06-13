@@ -7,4 +7,5 @@ require (
 	github.com/jlaffaye/ftp v0.0.0-20200422224957-b9f3ade29122
 	golang.org/x/net v0.0.0-20200425230154-ff2c4b7c35a0
 )
+
 // mod
