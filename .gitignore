@@ -2,6 +2,8 @@
 ### Example user template template
 ### Example user template
 
+# leetcode
+solutions/leetcode/cn/*.json
 # IntelliJ project files
 .idea
 .test_code
