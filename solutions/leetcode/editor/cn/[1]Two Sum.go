@@ -48,8 +48,3 @@ func twoSum(nums []int,target int) []int{
 //	return []int{0,0}
 //}
 //leetcode submit region end(Prohibit modification and deletion)
-
-func main()  {
-	nums := []int{3,2,4}
-	twoSum(nums,6)
-}
