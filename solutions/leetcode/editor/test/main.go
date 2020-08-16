@@ -2,28 +2,43 @@ package main
 
 import "fmt"
 
-func minArray(numbers []int) int {
-	if len(numbers) == 1 {
-		return numbers[0]
+func findMedianSortedArrays(nums1 []int, nums2 []int) float64 {
+	var ret float64
+	var isOdd bool
+	var i, j int
+	mid := (len(nums1) + len(nums2) - 2) / 2
+	if (len(nums1)+len(nums2))%2 == 0 {
+		isOdd = false
+	} else {
+		isOdd = true
 	}
-	start, end := 0, len(numbers)-1
-	mid := (start + end) / 2
-	for start < end {
-		mid = (start + end) / 2
-		if numbers[mid] < numbers[end] {
-			//最小数在前半段
-			end = mid
-		} else if numbers[mid] > numbers[end] {
-			//最小数在后半段
-			start = mid + 1
+	//i,j = mid/2,mid/2
+
+	for mid >= 1 {
+		i, j = mid/2, mid/2
+		if nums1[i] < nums2[j] {
+			mid = mid - i - 1
+			nums1 = nums1[mid+1:]
 		} else {
-			end--
+			mid = mid - j - 1
+			nums2 = nums2[mid+1:]
 		}
 	}
-	return numbers[start]
-}
 
+	if !isOdd {
+		//偶数
+		ret = (float64(nums1[0]) + float64(nums2[0])) / 2
+	} else {
+		if nums1[0] > nums2[0] {
+			ret = float64(nums2[0])
+		} else {
+			ret = float64(nums1[0])
+		}
+	}
+	return ret
+}
 func main() {
-	n := []int{4, 1, 2, 3}
-	fmt.Print(minArray(n))
+	n := []int{-1, 3}
+	m := []int{1, 2}
+	fmt.Print(findMedianSortedArrays(n, m))
 }
