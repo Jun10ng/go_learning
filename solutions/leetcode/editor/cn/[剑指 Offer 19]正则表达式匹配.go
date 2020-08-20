@@ -84,16 +84,16 @@ func isMatch(s string, p string) bool {
 			if p[j]==s[i]||string(p[j])=="." {
 				dp[i+1][j+1] = dp[i][j]
 			}else if string(p[j])=="*" {
-				//p的第j个字符和s的第i+1个字符不能匹配，
-				//s="abc"，p="abcd*",让p的4,5个字符消失
-				//只判断p的前j-1 和 s的 前i+1
-				if string(p[j-1])==string(s[i]) || string(p[j-1])=="." {
-					// 如果p的前一个字符是 . 或与s[i]相等（即p[j]字符出现0次的情况），取上一行的处理结果
-					dp[i+1][j+1] = dp[i][j+1]
+				// p的第j个字符和s的第i+1个字符不能匹配，也就是星号是多余的 abc abcd*
+				if string(p[j-1])!=string(s[i]) && string(p[j-1])!="." {
+					dp[i+1][j+1] = dp[i+1][j-1]
+				}else {
+					// p[j] == * 并且 p的前一个字符等于 s[i]
+					//               abc abcc*|| abc abc* ||  abccccc abc*
+					//               *匹配0个  || *匹配 1个 ||  *匹配多个
+					dp[i+1][j+1] = dp[i+ 1][j-1]||dp[i+1][j]||dp[i][j+1]
 				}
-				//如果是*，则取前两个字符的判断结果
-				//p的第j个字符和s的第i+1个字符匹配结果
-				dp[i+1][j+1] = dp[i+1][j+1]||dp[i+1][j-1]
+
 			}
 		}
 	}

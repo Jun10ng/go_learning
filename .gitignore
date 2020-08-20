@@ -112,3 +112,5 @@ gen
 .vscode
 /.vscode/
 !/solutions/leetcode/editor/cn/all.json
+!/solutions/leetcode/editor/cn/all.json
+!/solutions/leetcode/editor/cn/translation.json
