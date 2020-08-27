@@ -1,8 +1,8 @@
 package main
 
 import (
-	"container/list"
 	"fmt"
+	"sort"
 )
 
 //给定二叉树: [3,9,20,null,null,15,7],
@@ -23,72 +23,54 @@ import (
 //]
 //
 
-//leetcode submit region begin(Prohibit modification and deletion)
-
 //* Definition for a binary tree node.
-type TreeNode struct {
-	Val   int
-	Left  *TreeNode
-	Right *TreeNode
+func main() {
+	nums := []int{1, 1, 2}
+	ans := permuteUnique(nums)
+	fmt.Print(ans)
 }
 
-func levelOrder(root *TreeNode) [][]int {
-	var ans [][]int
-	q := list.New()
-
-	return doLevelOrder(root, ans, 1, q)
-}
-
-func doLevelOrder(root *TreeNode, ans [][]int, level int, q *list.List) [][]int {
-	if root == nil {
-		return ans
-	}
-	q.PushBack(root)
-
-	for q.Len() != 0 {
-		v := make([]int, 0)
-		len := q.Len()
-		levelNodes := make([]TreeNode, 0, len)
-		for i := 0; i < len; i++ {
-			e, _ := q.Front().Value.(*TreeNode)
-			q.Remove(q.Front())
-			levelNodes = append(levelNodes, *e)
-			v = append(v, e.Val)
-
-			if e.Right != nil {
-				q.PushBack(e.Right)
-			}
-			if e.Left != nil {
-				q.PushBack(e.Left)
-			}
-		}
-		if level%2 == 1 {
-			v = reverse(v)
-		}
-		level++
-		ans = append(ans, v)
-	}
+func permuteUnique(nums []int) [][]int {
+	//var ans [][]int
+	sort.Ints(nums)
+	ans := make([][]int, 0, len(nums)*len(nums))
+	t := make([]int, 0, len(nums))
+	used := make([]bool, len(nums), len(nums))
+	trace(nums, t, used, &ans)
 	return ans
 }
-
-func reverse(s []int) []int {
-	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
-		s[i], s[j] = s[j], s[i]
+func trace(nums []int, t []int, used []bool, ans *[][]int) {
+	if len(nums) == len(t) {
+		ct := make([]int, len(t), len(t))
+		copy(ct, t)
+		*ans = append(*ans, ct)
+		return
 	}
-	return s
+	for i, e := range nums {
+		if used[i] {
+			continue
+		}
+		if i != 0 && used[i-1] && e == nums[i-1] {
+			continue
+		}
+		used[i] = true
+		t = append(t, e)
+		trace(nums, t, used, ans)
+		used[i] = false
+		t = removeLast(t)
+	}
+	return
 }
 
-//leetcode submit region end(Prohibit modification and deletion)
+func isContains(t []int, n int) bool {
+	for _, e := range t {
+		if e == n {
+			return true
+		}
+	}
+	return false
+}
 
-func main() {
-	t := new(TreeNode)
-	t.Val = 1
-	t.Left = &TreeNode{Val: 2}
-	t.Right = &TreeNode{Val: 3}
-
-	t.Left.Left = &TreeNode{Val: 4}
-	//t.Right.Left = &TreeNode{Val: 15}
-	t.Right.Right = &TreeNode{Val: 5}
-	ans := levelOrder(t)
-	fmt.Print(ans)
+func removeLast(t []int) []int {
+	return t[:len(t)-1]
 }
