@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"sort"
 )
 
 //给定二叉树: [3,9,20,null,null,15,7],
@@ -25,52 +24,67 @@ import (
 
 //* Definition for a binary tree node.
 func main() {
-	nums := []int{1, 1, 2}
-	ans := permuteUnique(nums)
-	fmt.Print(ans)
+	fmt.Print(solveNQueens(4))
+}
+func solveNQueens(n int) [][]string {
+	ans := &[][]string{}
+	cs := &[]string{}
+
+	var line string
+	for i := 0; i < n; i++ {
+		line += "."
+	}
+	for i := 0; i < n; i++ {
+		*cs = append(*cs, line)
+	}
+
+	//
+	trace(ans, cs, 0, 0, n)
+	return *ans
 }
 
-func permuteUnique(nums []int) [][]int {
-	//var ans [][]int
-	sort.Ints(nums)
-	ans := make([][]int, 0, len(nums)*len(nums))
-	t := make([]int, 0, len(nums))
-	used := make([]bool, len(nums), len(nums))
-	trace(nums, t, used, &ans)
-	return ans
-}
-func trace(nums []int, t []int, used []bool, ans *[][]int) {
-	if len(nums) == len(t) {
-		ct := make([]int, len(t), len(t))
-		copy(ct, t)
-		*ans = append(*ans, ct)
+func trace(ans *[][]string, cs *[]string, row, col, n int) {
+	if row == n {
+		cp := make([]string, n)
+		copy(cp, *cs)
+		*ans = append(*ans, cp)
 		return
 	}
-	for i, e := range nums {
-		if used[i] {
+
+	for i := 0; i < n; i++ {
+		if !Ok(cs, row, i) {
 			continue
 		}
-		if i != 0 && used[i-1] && e == nums[i-1] {
-			continue
-		}
-		used[i] = true
-		t = append(t, e)
-		trace(nums, t, used, ans)
-		used[i] = false
-		t = removeLast(t)
+		(*cs)[row] = (*cs)[row][:i] + "Q" + (*cs)[row][i+1:]
+		trace(ans, cs, row+1, 0, n)
+		(*cs)[row] = (*cs)[row][:i] + "." + (*cs)[row][i+1:]
 	}
-	return
+
 }
 
-func isContains(t []int, n int) bool {
-	for _, e := range t {
-		if e == n {
-			return true
+func Ok(cs *[]string, row, col int) bool {
+	n := len(*cs)
+	for i := 0; i < n; i++ {
+		if (*cs)[i][col] == 'Q' {
+			return false
 		}
 	}
-	return false
-}
+	//左上
+	for i, j := row-1, col-1; i >= 0 && j >= 0; {
+		if (*cs)[i][j] == 'Q' {
+			return false
+		}
+		i--
+		j--
+	}
+	//右上
+	for i, j := row-1, col+1; i >= 0 && j < n; {
+		if (*cs)[i][j] == 'Q' {
+			return false
+		}
+		i--
+		j++
+	}
 
-func removeLast(t []int) []int {
-	return t[:len(t)-1]
+	return true
 }
