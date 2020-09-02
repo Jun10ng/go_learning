@@ -46,6 +46,31 @@ package main
  * }
  */
 func pathSum(root *TreeNode, sum int) [][]int {
+	ans := &[][]int{}
+	e := []int{}
+	trace(root,0,sum,ans,e)
+	return *ans
+}
 
+func trace(root *TreeNode,cur, sum int,ans *[][]int, e []int){
+	// failure
+	if root==nil {
+		return
+	}
+
+	cur= cur + root.Val
+	e = append(e,root.Val)
+	// success
+	if(sum == cur&&sum == cur && root.Left == nil && root.Right==nil){
+		// 确保是叶节点
+		cp := make([]int,len(e))
+		copy(cp,e)
+		*ans = append(*ans,cp)
+		return
+	}
+
+
+	trace(root.Left,cur,sum,ans,e)
+	trace(root.Right,cur,sum,ans,e)
 }
 //leetcode submit region end(Prohibit modification and deletion)
