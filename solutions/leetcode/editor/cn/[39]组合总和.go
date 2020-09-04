@@ -75,6 +75,4 @@ func trace(c []int,ans *[][]int, e *[]int,cur,t,begin int)  {
 		}
 	}
 }
-
-
 //leetcode submit region end(Prohibit modification and deletion)
