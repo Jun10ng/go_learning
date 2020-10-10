@@ -17,6 +17,7 @@ package main
 
 //leetcode submit region begin(Prohibit modification and deletion)
 func partition(s string) [][]string {
+
 	ans := [][]string{}
 	path := []string{}
 	trace := func(path []string, idx int) {}
