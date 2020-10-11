@@ -47,6 +47,8 @@ package main
 
 //leetcode submit region begin(Prohibit modification and deletion)
 // 运行时间超时了
+// 优化方案：两头回溯：由于知道了开始节点和结束节点，我们可以从两头都开始回溯，选择"路径"（差一个字母的单词）少的一边回溯。
+// 直到两头节点有重合，说明连上了。
 func findLadders(beginWord string, endWord string, wordList []string) [][]string {
 	// prehandle
 	isEndWordExsit := false
