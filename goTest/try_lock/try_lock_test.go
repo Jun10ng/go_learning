@@ -1,6 +1,7 @@
 package try_lock
 
 import (
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"sync"
@@ -63,4 +64,15 @@ func TestTryLock(t *testing.T) {
 		return
 	}
 	fmt.Println("can not get the lock")
+}
+func TestJsonEmpty(t *testing.T) {
+	ts := &ts{}
+	ts.T = "ABC"
+	jts, _ := json.Marshal(ts)
+	fmt.Printf("json :%v", jts)
+}
+
+type ts struct {
+	T string `json:"t"`
+	S int    `json:"s"`
 }
