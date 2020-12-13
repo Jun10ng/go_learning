@@ -2,52 +2,33 @@ package main
 
 import (
 	"fmt"
-	"strconv"
+	"math"
 )
 
 func main() {
-	fmt.Print(isAdditiveNumber("1235813"))
-	//fmt.Print(ok("aabaa"))
+	fmt.Print(coinChange([]int{2, 3, 5}, 12))
 }
-func isAdditiveNumber(num string) bool {
-	ret := false
-	//l,ml := len(num),len(num)/2 //单个数字长度不大于ml
-	trace := func(cnt, n1, n2 int, rest string) {}
-	// cnt 是目前池内数字，当cnt > 2 才会判断
-	// rest 是可选择的string
 
-	trace = func(cnt, n1, n2 int, rest string) {
-		if len(rest) == 0 {
-			if cnt > 2 {
-				ret = true
-			}
-			return
-		}
+var MAX = 99999
 
-		//开始从rest中取值，添加分支并剪枝
-		n3 := ""
-		for _, e := range rest {
-			n3 = n3 + string(e)
-			// 0 可以新建分支 01 02 则剪枝
-			if n3[0] == '0' && len(n3) != 1 {
-				return
+// DP 解法
+func coinChange(coins []int, amount int) int {
+	dp := make([]int, 0)
+	for i := 0; i <= amount; i++ {
+		dp = append(dp, MAX)
+	}
+	// 初始化状态
+	dp[0] = 0
+
+	// 状态
+	for i := 1; i <= amount; i++ {
+		for _, coin := range coins {
+			if i < coin {
+				continue
 			}
-			e, _ := strconv.Atoi(n3)
-			if cnt >= 2 {
-				if e == n1+n2 {
-					trace(cnt+1, n2, e, rest[len(n3):])
-				}
-			} else {
-				trace(cnt+1, n2, e, rest[len(n3):])
-			}
-			if ret {
-				return
-			}
+			// 决策
+			dp[i] = int(math.Min(float64(dp[i]), float64(1+dp[i-coin])))
 		}
 	}
-
-	//199100199
-	//
-	trace(0, 0, 0, num)
-	return ret
+	return dp[amount]
 }
