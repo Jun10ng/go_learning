@@ -6,29 +6,29 @@ import (
 )
 
 func main() {
-	fmt.Print(coinChange([]int{2, 3, 5}, 12))
+	fmt.Println(maxProduct([]int{2, 3, -2, 4}))
+	fmt.Println(maxProduct([]int{-2, 0, -1}))
 }
 
-var MAX = 99999
-
 // DP 解法
-func coinChange(coins []int, amount int) int {
-	dp := make([]int, 0)
-	for i := 0; i <= amount; i++ {
-		dp = append(dp, MAX)
-	}
-	// 初始化状态
-	dp[0] = 0
+/*
+	dp[i] = max(1,dp[i-1]*nums[i]) // 正数值最大
+	neg_dp[i]                            // 数值最大
+*/
+func maxProduct(nums []int) (ans int) {
+	imax := 1 //最大值
+	imin := 1 //最小值 ，双负数情况
+	max := math.MinInt64
 
-	// 状态
-	for i := 1; i <= amount; i++ {
-		for _, coin := range coins {
-			if i < coin {
-				continue
-			}
-			// 决策
-			dp[i] = int(math.Min(float64(dp[i]), float64(1+dp[i-coin])))
+	for _, e := range nums {
+		if e < 0 {
+			tmp := imax
+			imax = imin
+			imin = tmp
 		}
+		imax = int(math.Max(float64(e), float64(imax*e)))
+		imin = int(math.Min(float64(e), float64(imin*e)))
+		max = int(math.Max(float64(max), float64(imax)))
 	}
-	return dp[amount]
+	return max
 }
