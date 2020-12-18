@@ -57,30 +57,40 @@ import "math"
 
 
 //leetcode submit region begin(Prohibit modification and deletion)
-var MAX = 99999
 
 // DP 解法
-func coinChange(coins []int, amount int) int {
-	dp := make([]int, 0)
-	for i := 0; i <= amount; i++ {
-		dp = append(dp, MAX)
+func coinChange(coins []int, amount int) int{
+	/*
+	 dp[0] = 0
+	 dp[i] = min{dp[i],dp[i-coin]+1}
+	*/
+	dp := make([]int,amount+1)
+	// 初始化
+	for i,_:=range dp{
+		dp[i] = 99999
 	}
-	// 初始化状态
 	dp[0] = 0
 
-	// 状态
-	for i := 1; i <= amount; i++ {
-		for _, coin := range coins {
-			if i < coin {
+	for curAmount:=1;curAmount<=amount;curAmount++{
+		for _,coin:=range coins{
+			if curAmount<coin {
 				continue
 			}
-			// 决策
-			dp[i] = int(math.Min(float64(dp[i]), float64(1+dp[i-coin])))
+
+			//
+			dp[curAmount] = min(dp[curAmount],dp[curAmount-coin]+1)
 		}
 	}
-	if dp[amount] == MAX{
+	if dp[amount] == 99999 {
 		return -1
 	}
 	return dp[amount]
+
+}
+func min(a,b int) int {
+	if a>b {
+		return b
+	}
+	return a
 }
 //leetcode submit region end(Prohibit modification and deletion)
