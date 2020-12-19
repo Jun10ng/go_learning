@@ -5,61 +5,50 @@ import (
 )
 
 func main() {
-	fmt.Println(canPartition([]int{1, 5, 11, 5}))
-	fmt.Println(canPartition([]int{1, 2, 5}))
+	fmt.Println(findMaxForm([]string{"10", "0001", "111001", "1", "0"}, 5, 3))
+	fmt.Println(findMaxForm([]string{"10", "0", "1"}, 1, 1))
 }
 
-func canPartition(nums []int) bool {
+func findMaxForm(strs []string, m int, n int) int {
 	/*
-			特殊 0-1 背包问题 价值都为1，即相等价值
-			[1, 5, 11, 5] true
-			[1,2,5] false
+			0-1 背包问题 找出最大子集
 
-		    状态 n:背包内物品数量 w:背包还能装下的重量
-			tn: 前n件商品
-			dp[tn][w] : 在选择商品范围为前n件商品时，背包有w空间，此时最大价值
-		    tn
-		  w 0 0 0 0 0
-			0 1 1 1 1
-		    0 1 2 3 3
-		    0 1 2 3 3
+			状态：m 和 n 和 str[i] 其实是有三种状态的，
+				但由于使用了状态压缩，去掉了str[i]
+			dp[m][n] : 满足条件m n的最大子集
+			dp[0][0] = 0
+			k= str[i]含0数 z=str[i]含1数
+		    dp[m][n] = max{dp[m][n],dp[m-k][n-z]+1}
 
-		   return dp[len(nums)][sum] == sum
+		难点：由于状态压缩，要对m和n，从大到小遍历
+		在状态压缩时，为了避免后面的值被反复更新，要时候倒序遍历
 	*/
-
-	//初始化
-	sum := 0
-	for _, e := range nums {
-		sum += e
-	}
-	if sum&1 != 0 {
-		return false
-	}
-	sum = sum / 2
 	dp := make([][]int, 0)
-	for i := 0; i <= len(nums); i++ {
-		dpi := make([]int, sum+1)
+	for i := 0; i <= m; i++ {
+		dpi := make([]int, n+1)
 		dp = append(dp, dpi)
 	}
-	for i := 0; i <= len(nums); i++ {
-		dp[i][0] = 0
-	}
-	for i := 0; i <= sum; i++ {
-		dp[0][i] = 0
-	}
 
-	// 决策
-	for tn := 1; tn <= len(nums); tn++ {
-		curNum := nums[tn-1]
-		for w := 1; w <= sum; w++ {
-			if curNum > w {
-				continue
+	for _, str := range strs {
+		k, z := gen01(str)
+		for i := m; i >= k; i-- {
+			for j := n; j >= z; j-- {
+				dp[i][j] = max(dp[i][j], dp[i-k][j-z]+1)
 			}
-			dp[tn][w] = max(dp[tn-1][w], dp[tn-1][w-curNum]+curNum)
 		}
 	}
-
-	return dp[len(nums)][sum] == sum
+	return dp[m][n]
+}
+func gen01(s string) (int, int) {
+	k, z := 0, 0
+	for _, e := range s {
+		if string(e) == "0" {
+			k++
+		} else {
+			z++
+		}
+	}
+	return k, z
 }
 func max(a, b int) int {
 	if a > b {
