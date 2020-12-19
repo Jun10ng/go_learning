@@ -5,50 +5,41 @@ import (
 )
 
 func main() {
-	fmt.Println(findMaxForm([]string{"10", "0001", "111001", "1", "0"}, 5, 3))
-	fmt.Println(findMaxForm([]string{"10", "0", "1"}, 1, 1))
+	fmt.Println(findTargetSumWays([]int{1, 1, 1, 1, 1}, 3))
 }
 
-func findMaxForm(strs []string, m int, n int) int {
+func findTargetSumWays(nums []int, S int) int {
 	/*
-			0-1 背包问题 找出最大子集
-
-			状态：m 和 n 和 str[i] 其实是有三种状态的，
-				但由于使用了状态压缩，去掉了str[i]
-			dp[m][n] : 满足条件m n的最大子集
-			dp[0][0] = 0
-			k= str[i]含0数 z=str[i]含1数
-		    dp[m][n] = max{dp[m][n],dp[m-k][n-z]+1}
-
-		难点：由于状态压缩，要对m和n，从大到小遍历
-		在状态压缩时，为了避免后面的值被反复更新，要时候倒序遍历
+			状态压缩
+		https://leetcode-cn.com/problems/target-sum/solution/huan-yi-xia-jiao-du-ke-yi-zhuan-huan-wei-dian-xing/
+		把所有符号为正的数总和设为一个背包的容量，容量为x；把所有符号为负的数总和设为一个背包的容量，
+		容量为y。在给定的数组中，有多少种选择方法让背包装满。令sum为数组的总和，
+		则x+y=sum。而两个背包的差为S,
+		则x-y=S。从而求得x=(S+sum)/2。
+		基于上述分析，题目转换为背包问题：给定一个数组和一个容量为x的背包，求有多少种方式让背包装满。
 	*/
-	dp := make([][]int, 0)
-	for i := 0; i <= m; i++ {
-		dpi := make([]int, n+1)
-		dp = append(dp, dpi)
+
+	sum := 0
+	for _, e := range nums {
+		sum += e
+	}
+	if (S+sum)&1 != 0 || S > sum {
+		return 0
 	}
 
-	for _, str := range strs {
-		k, z := gen01(str)
-		for i := m; i >= k; i-- {
-			for j := n; j >= z; j-- {
-				dp[i][j] = max(dp[i][j], dp[i-k][j-z]+1)
-			}
+	length := (S + sum) / 2
+	dp := make([]int, 0)
+	for i := 0; i <= length; i++ {
+		dp = append(dp, 0)
+	}
+	dp[0] = 1
+
+	for _, num := range nums {
+		for i := length; i >= num; i-- {
+			dp[i] += dp[i-num]
 		}
 	}
-	return dp[m][n]
-}
-func gen01(s string) (int, int) {
-	k, z := 0, 0
-	for _, e := range s {
-		if string(e) == "0" {
-			k++
-		} else {
-			z++
-		}
-	}
-	return k, z
+	return dp[length]
 }
 func max(a, b int) int {
 	if a > b {
