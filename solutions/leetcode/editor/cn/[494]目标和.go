@@ -37,7 +37,31 @@ package main
 //leetcode submit region begin(Prohibit modification and deletion)
 func findTargetSumWays(nums []int, S int) int {
 	/*
-
+	 所有正符号的数之和 x
+	 所有负符号的数之和 y
+	x+y = sum
+	x -y = S
+	所以 x = (sum+S)/2
+	问题转换为，一个容量为X的背包，能有几种方法放满
 	*/
+	sum := 0
+	for _,e:=range nums{
+		sum += e
+	}
+	if (sum+S)&1!=0 || sum < S {
+		return 0
+	}
+	x := (sum+S)/2
+	dp := make([]int,x+1)
+	dp[0] = 1 // 0容量 1 种办法 初始化
+
+	for _,num:=range nums{
+		for i := x; i >= num; i-- {
+			// 状态压缩 所以要从大到小遍历
+			dp[i] += dp[i-num]
+		}
+	}
+	return dp[x]
+
 }
 //leetcode submit region end(Prohibit modification and deletion)

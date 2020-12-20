@@ -5,7 +5,7 @@ import (
 )
 
 func main() {
-	fmt.Println(findTargetSumWays([]int{1, 1, 1, 1, 1}, 3))
+	fmt.Println(findTargetSumWays([]int{1}, 1))
 }
 
 func findTargetSumWays(nums []int, S int) int {
