@@ -2,44 +2,37 @@ package main
 
 import (
 	"fmt"
+	"image"
 )
 
 func main() {
-	fmt.Println(findTargetSumWays([]int{1}, 1))
+	fmt.Println(completeBag([]int{0, 3, 2, 1}, []int{0, 5, 2, 3}, 3, 5))
 }
 
-func findTargetSumWays(nums []int, S int) int {
+func completeBag(w, n []int, W, N int) int {
 	/*
-			状态压缩
-		https://leetcode-cn.com/problems/target-sum/solution/huan-yi-xia-jiao-du-ke-yi-zhuan-huan-wei-dian-xing/
-		把所有符号为正的数总和设为一个背包的容量，容量为x；把所有符号为负的数总和设为一个背包的容量，
-		容量为y。在给定的数组中，有多少种选择方法让背包装满。令sum为数组的总和，
-		则x+y=sum。而两个背包的差为S,
-		则x-y=S。从而求得x=(S+sum)/2。
-		基于上述分析，题目转换为背包问题：给定一个数组和一个容量为x的背包，求有多少种方式让背包装满。
+			tn
+		   m 0 0 0 0
+		     1
+		     2
+		 	 3
+			 4
+		     5
+
 	*/
-
-	sum := 0
-	for _, e := range nums {
-		sum += e
-	}
-	if (S+sum)&1 != 0 || S > sum {
-		return 0
+	dp := make([][]int, N+1)
+	for i := 0; i < len(dp); i++ {
+		dpi := make([]int, W+1)
+		dp[i] = dpi
 	}
 
-	length := (S + sum) / 2
-	dp := make([]int, 0)
-	for i := 0; i <= length; i++ {
-		dp = append(dp, 0)
-	}
-	dp[0] = 1
-
-	for _, num := range nums {
-		for i := length; i >= num; i-- {
-			dp[i] += dp[i-num]
+	// 遍历每一件商品
+	for i := 1; i < len(dp); i++ {
+		// 遍历背包容量
+		for rw := 1; rw < len(dp[i]); rw++ {
+			//尽可能放入多次物品
 		}
 	}
-	return dp[length]
 }
 func max(a, b int) int {
 	if a > b {
