@@ -1,9 +1,10 @@
 package main
 
-import "fmt"
-
 // 回文串个数
-
+// 难点在于
+// 1.初始化要置对角元素为true
+// 2.决策 dp[i][j] = str[i] == str[j] && (j-i < 3 || dp[i+1][j-1])
+// 3.最外层循环是j，内层是i，i<j
 /*
 	给定一个字符串，你的任务是计算这个字符串中有多少个回文子串。
 	具有不同开始位置或结束位置的子串，即使是由相同的字符组成，也会被视作不同的子串。
@@ -15,9 +16,9 @@ import "fmt"
 解释：共有六个回文子串，分别为 "a", "a", "a", "aa", "aa", "aaa"。
 注意题设，具有不同开始位置或结束位置的子串，即使是由相同的字符组成，也会被视作不同的子串，因此像 "aa" 和 "aa" 就是两个不同的回文子串。
 */
-func main() {
-	fmt.Println(dp("aaa"))
-}
+//func main() {
+//	fmt.Println(dp("aaa"))
+//}
 func dp(str string) int {
 	ans := 0
 	dp := make([][]bool, 0)
