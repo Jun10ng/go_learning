@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 // 最大子序列问题
 
 // 难点在于：dp[i]的定义是：以str[i]字符结尾的最大子数组和是多少
@@ -14,9 +12,9 @@ import "fmt"
 输出：6
 解释：连续子数组 [4,-1, 3] 的和最大为 6。
 */
-func main() {
-	fmt.Println(maxSubArraySum([]int{-2, 1, -3, 4, -1, 3, -5, 1, 2}))
-}
+//func main() {
+//	fmt.Println(maxSubArraySum([]int{-2, 1, -3, 4, -1, 3, -5, 1, 2}))
+//}
 
 func maxSubArraySum(nums []int) int {
 	ans := -99990

@@ -5,56 +5,33 @@ import (
 )
 
 func main() {
-	fmt.Println(completeBagV1([]int{0, 3, 2, 1}, []int{0, 5, 2, 3}, 3, 5))
-	fmt.Println(completeBagV2([]int{0, 3, 2, 1}, []int{0, 5, 2, 3}, 3, 5))
+	fmt.Println(longestPalindrome("cbbd"))
 }
 
-func completeBagV1(w, n []int, N, W int) int {
-	dp := make([][]int, N+1)
-	for i := 0; i < len(dp); i++ {
-		dpi := make([]int, W+1)
-		dp[i] = dpi
+func longestPalindrome(s string) string {
+	if len(s) <= 1 {
+		return s
+	}
+	dp := make([][]bool, 0)
+	ans := string(s[0])
+	for i := 0; i < len(s)+1; i++ {
+		dpi := make([]bool, len(s)+1)
+		dp = append(dp, dpi)
 	}
 
-	// 遍历每一件商品
-	for i := 1; i <= N; i++ {
-		// 遍历背包容量
-		for rw := 1; rw <= W; rw++ {
-			//尽可能放入多次物品
-			dp[i][rw] = dp[i-1][rw]
-			for k := 0; k <= rw/w[i]; k++ {
-				dp[i][rw] = max(dp[i][rw], dp[i-1][rw-k*w[i]]+k*n[i])
+	for i := 1; i < len(dp); i++ {
+		dp[i][i] = true
+	}
+
+	for j := 1; j < len(s); j++ {
+		for i := 0; i < j; i++ {
+			dp[i][j] = s[i] == s[j] && (j-i < 3 || dp[i+1][j-1])
+			if dp[i][j] && j-i+1 > len(ans) {
+				ans = s[i : j+1]
 			}
 		}
 	}
-	fmt.Println("============V1============")
-	for _, dpi := range dp {
-		fmt.Println(dpi)
-	}
-	return dp[N][W]
-}
-func completeBagV2(w, n []int, N, W int) int {
-	dp := make([][]int, N+1)
-	for i := 0; i < len(dp); i++ {
-		dpi := make([]int, W+1)
-		dp[i] = dpi
-	}
-
-	// 遍历每一件商品
-	for i := 1; i <= N; i++ {
-		// 遍历背包容量
-		for rw := 1; rw <= W; rw++ {
-			//尽可能放入多次物品
-			if rw >= w[i] {
-				dp[i][rw] = max(dp[i-1][rw], dp[i][rw-w[i]]+n[i])
-			}
-		}
-	}
-	fmt.Println("============V2============")
-	for _, dpi := range dp {
-		fmt.Println(dpi)
-	}
-	return dp[N][W]
+	return ans
 }
 func max(a, b int) int {
 	if a > b {
