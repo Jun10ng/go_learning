@@ -1,10 +1,8 @@
 package main
 
-import "fmt"
-
-func main() {
-	fmt.Println(longestCommonSubsequence("abcde", "ace"))
-}
+//func main() {
+//	fmt.Println(longestCommonSubsequence("abcde", "ace"))
+//}
 func longestCommonSubsequence(text1 string, text2 string) int {
 	// dp[i][j] ：text1[0:i]和 text[0:j]的最长公共子序列长度
 	// if text1[i] = text[j] dp[i][j] = 1+dp[i-1][j-1]

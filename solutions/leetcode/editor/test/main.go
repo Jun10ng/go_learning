@@ -5,33 +5,44 @@ import (
 )
 
 func main() {
-	fmt.Println(longestPalindrome("cbbd"))
-}
-
-func longestPalindrome(s string) string {
-	if len(s) <= 1 {
-		return s
+	m := [][]int{
+		{0, 0}, {1, 1}, {0, 0},
 	}
-	dp := make([][]bool, 0)
-	ans := string(s[0])
-	for i := 0; i < len(s)+1; i++ {
-		dpi := make([]bool, len(s)+1)
+	fmt.Println(uniquePathsWithObstacles(m))
+}
+func uniquePathsWithObstacles(obstacleGrid [][]int) int {
+	if obstacleGrid[0][0] == 1 {
+		return 0
+	}
+	dp := make([][]int, 0)
+	for i := 0; i < len(obstacleGrid); i++ {
+		dpi := make([]int, len(obstacleGrid[0]))
 		dp = append(dp, dpi)
 	}
-
-	for i := 1; i < len(dp); i++ {
-		dp[i][i] = true
+	// 初始化
+	for i := 0; i < len(obstacleGrid); i++ {
+		if obstacleGrid[i][0] == 0 {
+			dp[i][0] = 1
+		}
 	}
-
-	for j := 1; j < len(s); j++ {
-		for i := 0; i < j; i++ {
-			dp[i][j] = s[i] == s[j] && (j-i < 3 || dp[i+1][j-1])
-			if dp[i][j] && j-i+1 > len(ans) {
-				ans = s[i : j+1]
+	for i := 0; i < len(obstacleGrid[0]); i++ {
+		if obstacleGrid[0][i] == 0 {
+			dp[0][i] = 1
+		}
+	}
+	// 决策
+	for i := 1; i < len(dp); i++ {
+		for j := 1; j < len(dp[0]); j++ {
+			c := obstacleGrid[i][j]
+			switch c {
+			case 1:
+				dp[i][j] = 0
+			case 0:
+				dp[i][j] = dp[i-1][j] + dp[i][j-1]
 			}
 		}
 	}
-	return ans
+	return dp[len(obstacleGrid)-1][len(obstacleGrid[0])-1]
 }
 func max(a, b int) int {
 	if a > b {
