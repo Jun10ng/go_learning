@@ -50,51 +50,45 @@ package main
 
 //leetcode submit region begin(Prohibit modification and deletion)
 func lengthOfLIS(nums []int) int {
-	//输入：nums = [10,9,2,5,3,7,101,18]
-	//输出：4
-	//解释：最长递增子序列是 [2,3,7,101]，因此长度为 4 。
-	//{0,1,0,3,2,3} //  {0 1 2 3} 4
-
 	/*
-			dp[i] 以第i个元素结尾的最长递增子序列
-		    决策 ： 第i个元素 放或不放
-		    dp[i] = max(dp[i-1]+1, dp[j]+1) j 是上一个小于i元素的
+		dp[i] 从起始位置到i元素的最长上升序列
+		count[i] 从起始位置到i元素的最长上升序列个数
 	*/
-	if len(nums)==1 {
-		return 1
+	//numOfLIS,maxLen := 0,1
+	maxLen := 1
+	dp := make([]int,len(nums))
+	// 表示以第 i 个数字结尾的序列的最长上升子序列的数量。
+	// 解题思路：相当于对count 做一次DP
+	//count := make([]int,len(nums))
+	for i,_:=range dp{
+		dp[i] = 1
+		//	count[i] = 1
 	}
 
-	dp := make([]int,len(nums)+1)
-
-	// begin
-	findLastLess := func(i int) int{
-		ans := -1
-		for j:=i-1; j>-1;j-- {
-			if nums[j]< nums[i] {
-				ans = max(dp[j],ans)
+	for j := 0; j < len(nums) ; j++ {
+		for i := 0; i < j ; i++ {
+			if nums[i] < nums[j] {
+				dp[j] = max(dp[j],dp[i]+1)
+				//switch {
+				//case dp[i]+1 > dp[j]:
+				//	// 此时需要更新dp
+				//	dp[j] = dp[i]+1
+				//	count[j] = count[i] // 最长子序列在延续
+				//case dp[i]+1 == dp[j]:
+				//	count[j] += count[i] //出现了长度相同的最长子序列，叠加
+				//}
 			}
 		}
-		return ans
+		maxLen = max(dp[j],maxLen)
 	}
-	// end
-	dp[0] = 1
-	dp[1] = 1
-	ans := 0
-	for i:=1;i<len(nums);i++ {
-		switch  {
-		case nums[i]<nums[i-1]:
-			dp[i] = max(findLastLess(i)+1,1)
-		case nums[i]>nums[i-1]:
-			//dp[i] = dp[i-1] + 1
-			dp[i] = max(findLastLess(i)+1,dp[i-1]+1)
-		default:
-			dp[i] = dp[i-1]
-		}
-		ans = max(ans,dp[i])
-	}
-	return ans
+	//for i,e := range dp{
+	//	if e==maxLen {
+	//		numOfLIS+=count[i]
+	//	}
+	//}
+	//return numOfLIS
+	return maxLen
 }
-
 func max(a, b int) int {
 	if a > b {
 		return a
