@@ -1,73 +1,73 @@
 package main
 
-import (
-	"fmt"
-)
+import "fmt"
 
 func main() {
-	//m := [][]int{
-	//	{0, 0}, {1, 1}, {0, 0},
-	//}
-	fmt.Println(maxProfit([]int{3, 3, 5, 0, 0, 3, 1, 4}))
+	m := []int{1, 3, 5, 4, 7} // 1357 1347
+	fmt.Println(findNumberOfLIS(m))
+
+	//m1 := []int{1,2,4,3,5,4,7,2} // 12457 12456 12357
+	//fmt.Println(findNumberOfLIS(m1))
+
+	//m2 := []int{2, 15, 3, 7, 8, 6, 18} //  2 3 7 8 18
+	//
+	//fmt.Println(lengthOfLIS(m1))
+	//fmt.Println(lengthOfLIS(m2))
 	//fmt.Println(canJump([]int{3,2,1,0,4}))
 }
-func maxProfit(prices []int) int {
-	//   [3,3,5,0,0,3,1,4] => 6
+func findNumberOfLIS(nums []int) int {
 	/*
-			状态：天数，是否持有股票，交易次数
-			dp[i][j][k] : 在第i天交易某个股票
-		    j = 0 不持有 j = 1持有
-			dp[i][j][k]
-
-			dp[i][0][0] = 0                   , j=0,k=0
-		    //卖出过一次，最大利润有两种可能，要么是当天卖出，要么是之前卖出
-		    dp[i][0][1]= max{ dp[i-1][1][0]+p[i], dp[i-1][0][1] }
-		    dp[i][0][2]= max{ dp[i-1][1][1]+p[i], dp[i-1][0][2] }
-		    // 买入过一次 股票是当天买入，or 股票之前就有
-		    dp[i][1][0]= max{ dp[i-1][0][0]-p[i], dp[i-1][1][0] }
-		   	dp[i][1][1]= max{ dp[i-1][0][1]-p[i], dp[i-1][1][1] }
-			dp[i][1][2] = -99999
-
+		dp[i] 从起始位置到i元素的最长上升序列
+		count[i] 从起始位置到i元素的最长上升序列个数
 	*/
+	numOfLIS, maxLen := 0, 1
+	dp := make([]int, len(nums))
+	// 表示以第 i 个数字结尾的序列的最长上升子序列的数量。
+	// 解题思路：相当于对count 做一次DP
+	count := make([]int, len(nums))
+	for i, _ := range dp {
+		dp[i] = 1
+		count[i] = 1
+	}
 
-	dp := make([][][]int, 0)
-	for i := 0; i < len(prices); i++ {
-		dpi := make([][]int, 0)
-		for j := 0; j < 2; j++ {
-			dpj := make([]int, 3)
-			dpi = append(dpi, dpj)
+	for j := 0; j < len(nums); j++ {
+		for i := 0; i < j; i++ {
+			if nums[i] < nums[j] {
+				switch {
+				case dp[i]+1 > dp[j]:
+					// 此时需要更新dp
+					dp[j] = dp[i] + 1
+					count[j] = count[i] // 最长子序列在延续
+				case dp[i]+1 == dp[j]:
+					count[j] += count[i] //出现了长度相同的最长子序列，叠加
+				}
+			}
 		}
-		dp = append(dp, dpi)
+		maxLen = max(dp[j], maxLen)
 	}
-
-	// 初始化
-	// 处理第一天
-	//假设第一天没有买入
-	//dp[0][0][0] = 0;
-	//dp[0][0][1] = 0;
-	//dp[0][0][2] = 0;
-
-	//第一天的k=1 k=2的情况都要处理下
-	dp[0][1][0] = -prices[0]
-	dp[0][1][1] = -prices[0]
-	dp[0][0][2] = -prices[0]
-
-	for i := 1; i < len(prices); i++ {
-		p := prices[i]
-		dp[i][0][0] = 0
-		//卖出过一次，最大利润有两种可能，要么是当天卖出，要么是之前卖出
-		dp[i][0][1] = max(dp[i-1][1][0]+p, dp[i-1][0][1])
-		dp[i][0][2] = max(dp[i-1][1][1]+p, dp[i-1][0][2])
-		// 买入过一次 股票是当天买入，or 股票之前就有
-		dp[i][1][0] = max(dp[i-1][0][0]-p, dp[i-1][1][0])
-		dp[i][1][1] = max(dp[i-1][0][1]-p, dp[i-1][1][1])
-		dp[i][1][2] = 0
+	for i, e := range dp {
+		if e == maxLen {
+			numOfLIS += count[i]
+		}
 	}
-	return max(dp[len(prices)-1][0][1], dp[len(prices)-1][0][2])
+	return numOfLIS
 }
+
 func max(a, b int) int {
 	if a > b {
 		return a
 	}
 	return b
+}
+
+func min2(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func min3(a, b, c int) int {
+	tmp := min2(a, b)
+	return min2(tmp, c)
 }
