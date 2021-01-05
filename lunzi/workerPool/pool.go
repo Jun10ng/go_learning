@@ -12,10 +12,7 @@ const (
 	outputChanSize = 100
 )
 
-// GoWorkers worker集合
-
-// All workers will be killed after Stop() is called if their respective job finishes.
-type GoWorkers struct {
+type Workers struct {
 	numWorkers uint32
 	maxWorkers uint32
 	numJobs    uint32
@@ -41,59 +38,57 @@ type Options struct {
 	QSize   uint32
 }
 
-func New(args ...Options) *GoWorkers {
-	gw := &GoWorkers{
+func New(args ...Options) *Workers {
+	wrk := &Workers{
 		workerQ: make(chan func()),
-		// Do not remove jobQ. To stop receiving input once Stop() is called
+		// Do not remove jobQ. To stop receiving input once WaitWrkStop() is called
 		jobQ:       make(chan func()),
 		ErrChan:    make(chan error, outputChanSize),
 		ResultChan: make(chan interface{}, outputChanSize),
 		done:       make(chan struct{}),
 	}
 
-	gw.bufferedQ = make(chan func(), defaultQSize)
+	wrk.bufferedQ = make(chan func(), defaultQSize)
 	if len(args) == 1 {
-		gw.maxWorkers = args[0].Workers
+		wrk.maxWorkers = args[0].Workers
 		if args[0].QSize > defaultQSize {
-			gw.bufferedQ = make(chan func(), args[0].QSize)
+			wrk.bufferedQ = make(chan func(), args[0].QSize)
 		}
 	}
 
-	go gw.start()
+	go wrk.start()
 
-	return gw
+	return wrk
 }
 
-// JobNum returns number of active jobs
-func (gw *GoWorkers) JobNum() uint32 {
-	return atomic.LoadUint32(&gw.numJobs)
+func (wrk *Workers) JobNum() uint32 {
+	return atomic.LoadUint32(&wrk.numJobs)
 }
 
-// WorkerNum returns number of active workers
-func (gw *GoWorkers) WorkerNum() uint32 {
-	return atomic.LoadUint32(&gw.numWorkers)
+func (wrk *Workers) WorkerNum() uint32 {
+	return atomic.LoadUint32(&wrk.numWorkers)
 }
 
 // 无返回error的job
-func (gw *GoWorkers) Submit(job func()) {
-	if atomic.LoadInt32(&gw.stopping) == 1 {
+func (wrk *Workers) Submit(job func()) {
+	if atomic.LoadInt32(&wrk.stopping) == 1 {
 		return
 	}
-	atomic.AddUint32(&gw.numJobs, uint32(1))
-	gw.jobQ <- func() { job() }
+	atomic.AddUint32(&wrk.numJobs, uint32(1))
+	wrk.jobQ <- func() { job() }
 }
 
 // 有返回error的job
-func (gw *GoWorkers) SubmitCheckError(job func() error) {
-	if atomic.LoadInt32(&gw.stopping) == 1 {
+func (wrk *Workers) SubmitCheckError(job func() error) {
+	if atomic.LoadInt32(&wrk.stopping) == 1 {
 		return
 	}
-	atomic.AddUint32(&gw.numJobs, uint32(1))
-	gw.jobQ <- func() {
+	atomic.AddUint32(&wrk.numJobs, uint32(1))
+	wrk.jobQ <- func() {
 		err := job()
 		if err != nil {
 			select {
-			case gw.ErrChan <- err:
+			case wrk.ErrChan <- err:
 			default:
 			}
 		}
@@ -101,80 +96,80 @@ func (gw *GoWorkers) SubmitCheckError(job func() error) {
 }
 
 // 需要结果与错误
-func (gw *GoWorkers) SubmitCheckResult(job func() (interface{}, error)) {
-	if atomic.LoadInt32(&gw.stopping) == 1 {
+func (wrk *Workers) SubmitCheckResult(job func() (interface{}, error)) {
+	if atomic.LoadInt32(&wrk.stopping) == 1 {
 		return
 	}
-	atomic.AddUint32(&gw.numJobs, uint32(1))
-	gw.jobQ <- func() {
+	atomic.AddUint32(&wrk.numJobs, uint32(1))
+	wrk.jobQ <- func() {
 		result, err := job()
 		if err != nil {
 			select {
-			case gw.ErrChan <- err:
+			case wrk.ErrChan <- err:
 			default:
 			}
 		} else {
 			select {
-			case gw.ResultChan <- result:
+			case wrk.ResultChan <- result:
 			default:
 			}
 		}
 	}
 }
 
-// Stop 相当于 Wait()
-// wait = false 不会等待errChan 或者 resultChan 消费干净
+// waitChannel = true 会等待errChan 或者 resultChan 消费干净
 // 所以当你想接受所有的result或者err时 请使用true
-func (gw *GoWorkers) Stop(wait bool) {
-	if !atomic.CompareAndSwapInt32(&gw.stopping, 0, 1) {
+func (wrk *Workers) WaitWrkStop(waitChannel bool) {
+	if !atomic.CompareAndSwapInt32(&wrk.stopping, 0, 1) {
 		return
 	}
-	if gw.JobNum() != 0 {
-		<-gw.done
+	if wrk.JobNum() != 0 {
+		<-wrk.done
 	}
 
-	if wait {
-		for len(gw.ResultChan)|len(gw.ErrChan) == 0 {
+	if waitChannel {
+		for len(wrk.ResultChan)|len(wrk.ErrChan) == 0 {
 			break
 		}
 	}
 
 	// close the input channel
-	close(gw.jobQ)
+	close(wrk.jobQ)
 }
 
 var mx sync.Mutex
 
-func (gw *GoWorkers) spawnWorker() {
+// 判断是否需要生成新的worker
+func (wrk *Workers) genWoker() {
 	defer mx.Unlock()
 	mx.Lock()
-	if ((gw.maxWorkers == 0) || (gw.WorkerNum() < gw.maxWorkers)) && (gw.JobNum() > gw.WorkerNum()) {
-		go gw.startWorker()
+	if ((wrk.maxWorkers == 0) || (wrk.WorkerNum() < wrk.maxWorkers)) && (wrk.JobNum() > wrk.WorkerNum()) {
+		go wrk.startWorker()
 	}
 }
 
-func (gw *GoWorkers) start() {
+func (wrk *Workers) start() {
 	defer func() {
-		close(gw.bufferedQ)
-		close(gw.workerQ)
-		close(gw.ErrChan)
-		close(gw.ResultChan)
+		close(wrk.bufferedQ)
+		close(wrk.workerQ)
+		close(wrk.ErrChan)
+		close(wrk.ResultChan)
 	}()
 
 	// start a worker in advance
-	go gw.startWorker()
+	go wrk.startWorker()
 
 	go func() {
 		for {
 			select {
 			// keep processing the queued jobs
-			case job, ok := <-gw.bufferedQ:
+			case job, ok := <-wrk.bufferedQ:
 				if !ok {
 					return
 				}
 				go func() {
-					gw.spawnWorker()
-					gw.workerQ <- job
+					wrk.genWoker()
+					wrk.workerQ <- job
 				}()
 			}
 		}
@@ -182,33 +177,35 @@ func (gw *GoWorkers) start() {
 
 	for {
 		select {
-		case job, ok := <-gw.jobQ:
+		case job, ok := <-wrk.jobQ:
 			if !ok {
 				return
 			}
 			select {
 			// if possible, process the job without queueing
-			case gw.workerQ <- job:
-				go gw.spawnWorker()
+			case wrk.workerQ <- job:
+				go wrk.genWoker()
 			// queue it if no workers are available
 			default:
-				gw.bufferedQ <- job
+				wrk.bufferedQ <- job
 			}
 		}
 	}
 }
 
-func (gw *GoWorkers) startWorker() {
+// 实际处理步骤，没调用一次startWorker都相当于启动一个协程
+func (wrk *Workers) startWorker() {
 	defer func() {
-		atomic.AddUint32(&gw.numWorkers, ^uint32(0))
+		atomic.AddUint32(&wrk.numWorkers, ^uint32(0))
 	}()
 
-	atomic.AddUint32(&gw.numWorkers, 1)
+	atomic.AddUint32(&wrk.numWorkers, 1)
 
-	for job := range gw.workerQ {
+	for job := range wrk.workerQ {
+		// 不断接收任务处理
 		job()
-		if (atomic.AddUint32(&gw.numJobs, ^uint32(0)) == 0) && (atomic.LoadInt32(&gw.stopping) == 1) {
-			gw.done <- struct{}{}
+		if (atomic.AddUint32(&wrk.numJobs, ^uint32(0)) == 0) && (atomic.LoadInt32(&wrk.stopping) == 1) {
+			wrk.done <- struct{}{}
 		}
 	}
 }

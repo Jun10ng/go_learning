@@ -9,10 +9,6 @@ import (
 
 func main() {
 	opts := wp.Options{Workers: 10}
-	/*
-		1  worker 100 job use 10.249049777s
-		10 worker 10000 job use 1.027585385s
-	*/
 	pool := wp.New(opts)
 
 	go func() {
@@ -35,6 +31,6 @@ func main() {
 				return job(v)
 			})
 	}
-	pool.Stop(true)
+	pool.WaitWrkStop(true)
 	fmt.Printf("use time %v \n", time.Since(startTime))
 }
