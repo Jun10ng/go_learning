@@ -1,31 +1,36 @@
 package main
 
-import (
-	"fmt"
-)
+import "fmt"
 
 func main() {
-	//m := []int{4, 6, 7, 7} // 1357 1347
-	fmt.Println(climbStairs(4))
+	m := []int{1, 2} // 1357 1347
+	//m := []int{1, 100, 1, 1, 1, 100, 1, 1, 100, 1} // 1357 1347
+	fmt.Println(jump(m))
 }
-func climbStairs(n int) int {
+func jump(nums []int) int {
 	/*
-			dp[i] 到达i位置有几种跳法
-		    决策 使用1 跳 还是2 跳
-		    1 | 1,2,1
+		{2,3,1,1,4} => 2
+		dp[i] 跳到 i 的最少次数
+		0  1 1 2 2
 	*/
-
-	dp := make([]int, n+1)
-	dp[0] = 1
-	stepList := []int{1, 2}
-	for i := 1; i < n+1; i++ {
-		for _, step := range stepList {
-			if i-step >= 0 {
-				dp[i] += dp[i-step]
+	if len(nums) == 1 {
+		return 0
+	}
+	dp := make([]int, len(nums))
+	for i, _ := range dp {
+		dp[i] = 99999
+	}
+	dp[0] = 0
+	for i := 0; i < len(nums); i++ {
+		num := nums[i]
+		for j := 1; j < num+1; j++ {
+			if i+j >= len(nums) {
+				continue
 			}
+			dp[i+j] = min2(dp[i+j], dp[i]+1)
 		}
 	}
-	return dp[n]
+	return dp[len(nums)-1]
 }
 func max(a, b int) int {
 	if a > b {
