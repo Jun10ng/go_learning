@@ -39,3 +39,8 @@ func TestStrJoint(t *testing.T) {
 	s := "abcdabcdabc"
 	fmt.Print(strJoint(s))
 }
+
+func TestMoveNums(t *testing.T) {
+	n := []int{-1, 2, 0, -3, 0, 4, -5}
+	fmt.Println(moveNum(n))
+}
