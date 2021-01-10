@@ -3,34 +3,30 @@ package main
 import "fmt"
 
 func main() {
-	m := []int{1, 2} // 1357 1347
-	//m := []int{1, 100, 1, 1, 1, 100, 1, 1, 100, 1} // 1357 1347
-	fmt.Println(jump(m))
+
+	fmt.Println(numTilings(4))
 }
-func jump(nums []int) int {
+
+func numTilings(N int) int {
 	/*
-		{2,3,1,1,4} => 2
-		dp[i] 跳到 i 的最少次数
-		0  1 1 2 2
+		输入 3 输出  5
+
+		dp[i] 为 搭建方案种数
+		dp[0] = 0 dp[1] =1 dp[2]=2 dp[3] = 5
+
+		dp[i] = max(dp[i-j] * dp[j]) 0<j<i
 	*/
-	if len(nums) == 1 {
-		return 0
-	}
-	dp := make([]int, len(nums))
-	for i, _ := range dp {
-		dp[i] = 99999
-	}
-	dp[0] = 0
-	for i := 0; i < len(nums); i++ {
-		num := nums[i]
-		for j := 1; j < num+1; j++ {
-			if i+j >= len(nums) {
-				continue
-			}
-			dp[i+j] = min2(dp[i+j], dp[i]+1)
+
+	dp := make([]int, N+1)
+	dp[0], dp[1], dp[2], dp[3] = 0, 1, 2, 5
+
+	for i := 4; i < N+1; i++ {
+		for j := 1; j < i; j++ {
+			dp[i] += dp[i-j] * dp[j]
 		}
 	}
-	return dp[len(nums)-1]
+
+	return dp[N]
 }
 func max(a, b int) int {
 	if a > b {
