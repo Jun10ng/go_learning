@@ -4,6 +4,7 @@
 
 # leetcode
 solutions/leetcode/cn/*.json
+*.json
 
 # IntelliJ project files
 .idea
