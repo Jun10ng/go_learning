@@ -75,4 +75,10 @@ func rob(root *TreeNode) int {
 	// run
 	return max(calcu(root))
 }
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
 //leetcode submit region end(Prohibit modification and deletion)

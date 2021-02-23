@@ -1,32 +1,29 @@
 package main
 
+import (
+	"fmt"
+)
+
 func main() {
+	fmt.Println(maxSubArray([]int{1}))
 }
-
-func wordBreak(s string, wordDict []string) bool {
-
-	/*// 输入: s = "leetcode", wordDict = ["leet", "code"]
-	  //输出: true
-	  //解释: 返回 true 因为 "leetcode" 可以被拆分成 "leet code"。*/
-
-	dp := make([]bool, len(s)+1)
-
-	wordMap := make(map[string]bool, len(wordDict))
-	for _, word := range wordDict {
-		wordMap[word] = true
+func maxSubArray(nums []int) int {
+	/*
+	  dp[i] 第i个元素结尾的最大子序和
+	*/
+	MinValue := -999999
+	ret := MinValue
+	dp := make([]int, len(nums)+1)
+	for i, _ := range dp {
+		dp[i] = MinValue
 	}
-	wordMap[""] = true
-	dp[0] = true
-	for j := 1; j < len(dp); j++ {
-		for i := 0; i < j; i++ {
-			str2 := s[i:j]
-			if dp[i] && wordMap[str2] {
-				dp[j] = true
-				break
-			}
-		}
+
+	for i := 1; i < len(dp); i++ {
+		num := nums[i-1]
+		dp[i] = max(dp[i-1]+num, num)
+		ret = max(dp[i], ret)
 	}
-	return dp[len(s)]
+	return ret
 }
 func max(a, b int) int {
 	if a > b {
