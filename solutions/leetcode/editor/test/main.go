@@ -5,23 +5,25 @@ import (
 )
 
 func main() {
-	fmt.Println(maxSubArray([]int{1}))
+	fmt.Println(subarraySum([]int{1, 1, 1}, 2))
 }
-func maxSubArray(nums []int) int {
+func subarraySum(nums []int, k int) int {
 	/*
-	  dp[i] 第i个元素结尾的最大子序和
+		前缀和
+		pre[i] 代表前i个元素之和
+		num = nums[i]
+		ret = num + pre[
 	*/
-	MinValue := -999999
-	ret := MinValue
-	dp := make([]int, len(nums)+1)
-	for i, _ := range dp {
-		dp[i] = MinValue
-	}
-
-	for i := 1; i < len(dp); i++ {
-		num := nums[i-1]
-		dp[i] = max(dp[i-1]+num, num)
-		ret = max(dp[i], ret)
+	ret := 0
+	sum := 0
+	pre := make(map[int]int, 0)
+	pre[0] = 1
+	for i := 0; i < len(nums); i++ {
+		sum += nums[i]
+		if _, ok := pre[sum-k]; ok {
+			ret += pre[sum-k]
+		}
+		pre[sum] += 1
 	}
 	return ret
 }
