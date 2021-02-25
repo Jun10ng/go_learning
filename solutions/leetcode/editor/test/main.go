@@ -5,25 +5,29 @@ import (
 )
 
 func main() {
-	fmt.Println(subarraySum([]int{1, 1, 1}, 2))
+	fmt.Println(productExceptSelf([]int{2, 1, 3, 4}))
 }
-func subarraySum(nums []int, k int) int {
+func productExceptSelf(nums []int) []int {
+	// 输入: [2,1,3,4]
+	//输出: [12,24,8,6]
 	/*
-		前缀和
-		pre[i] 代表前i个元素之和
-		num = nums[i]
-		ret = num + pre[
+		pre[i] = 后 i 个元素的乘积，（i元素右边的乘积
+		lp 前i-1个元素的乘积 (i元素左边的乘积
 	*/
-	ret := 0
-	sum := 0
-	pre := make(map[int]int, 0)
+	ret := make([]int, 0)
+	pre := make([]int, len(nums)+1)
 	pre[0] = 1
+	pre[len(nums)] = 1
+	for i := 1; i < len(nums); i++ {
+		pre[i] = pre[i-1] * nums[len(nums)-i]
+	}
+	//1 4 12 12 1
+
+	lp := 1
 	for i := 0; i < len(nums); i++ {
-		sum += nums[i]
-		if _, ok := pre[sum-k]; ok {
-			ret += pre[sum-k]
-		}
-		pre[sum] += 1
+		reti := lp * pre[len(nums)-(i+1)]
+		ret = append(ret, reti)
+		lp = lp * nums[i]
 	}
 	return ret
 }
