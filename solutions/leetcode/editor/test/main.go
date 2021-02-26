@@ -5,31 +5,28 @@ import (
 )
 
 func main() {
-	fmt.Println(productExceptSelf([]int{2, 1, 3, 4}))
+	fmt.Println(pivotIndex([]int{1, 7, 3, 6, 5, 6}))
 }
-func productExceptSelf(nums []int) []int {
-	// 输入: [2,1,3,4]
-	//输出: [12,24,8,6]
+func pivotIndex(nums []int) int {
 	/*
-		pre[i] = 后 i 个元素的乘积，（i元素右边的乘积
-		lp 前i-1个元素的乘积 (i元素左边的乘积
+		[1, 7, 3, 6, 5, 6] 3
+		sub[i] i元素后面的和
+		leftSum 前i个元素的和
 	*/
-	ret := make([]int, 0)
-	pre := make([]int, len(nums)+1)
-	pre[0] = 1
-	pre[len(nums)] = 1
+	sub := make([]int, len(nums)+1)
+	sub[len(nums)] = 0
 	for i := 1; i < len(nums); i++ {
-		pre[i] = pre[i-1] * nums[len(nums)-i]
+		num := nums[len(nums)-i]
+		sub[len(nums)-i] = sub[len(nums)-i+1] + num
 	}
-	//1 4 12 12 1
-
-	lp := 1
+	leftSum := 0
 	for i := 0; i < len(nums); i++ {
-		reti := lp * pre[len(nums)-(i+1)]
-		ret = append(ret, reti)
-		lp = lp * nums[i]
+		if leftSum == sub[i+1] {
+			return i
+		}
+		leftSum += nums[i]
 	}
-	return ret
+	return -1
 }
 func max(a, b int) int {
 	if a > b {
