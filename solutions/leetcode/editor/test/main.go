@@ -2,32 +2,57 @@ package main
 
 import (
 	"fmt"
+	"sort"
 )
 
 func main() {
-	fmt.Println(pivotIndex([]int{1, 7, 3, 6, 5, 6}))
+	//fmt.Println(minSumOfLengths([]int{1,2,2,3,2,6,7,2,1,4,},5))
+	//fmt.Println(minSumOfLengths([]int{1,6,1},7))
+	//fmt.Println(minSumOfLengths([]int{3,1,1,1,5,1,2,1},3))
+	fmt.Println(minSumOfLengths([]int{1, 1, 1, 2, 2, 2, 4, 4}, 6))
 }
-func pivotIndex(nums []int) int {
+func minSumOfLengths(arr []int, target int) int {
 	/*
-		[1, 7, 3, 6, 5, 6] 3
-		sub[i] i元素后面的和
-		leftSum 前i个元素的和
+		参考：https://leetcode-cn.com/problems/find-two-non-overlapping-sub-arrays-each-with-target-sum/solution/xiang-xi-jiang-jie-yi-xia-shuang-zhi-zhe-jjt9/
+		双指针 动态规划
+		通过双指针来找符合条件的子数组
+		通过动态规划来判断是否越界
+		dp[i]: i元素之前满足的最小子数组长度
 	*/
-	sub := make([]int, len(nums)+1)
-	sub[len(nums)] = 0
-	for i := 1; i < len(nums); i++ {
-		num := nums[len(nums)-i]
-		sub[len(nums)-i] = sub[len(nums)-i+1] + num
-	}
-	leftSum := 0
-	for i := 0; i < len(nums); i++ {
-		if leftSum == sub[i+1] {
-			return i
+	dp := make([]int, len(arr)+1)
+	dp[0] = len(arr) + 1
+	allAns := make([]int, 0)
+	i := 0
+	j := 0
+	sum := 0
+	for ; j < len(arr); j++ {
+		sum += arr[j]
+		for sum > target {
+			sum -= arr[i]
+			i++
 		}
-		leftSum += nums[i]
+		if sum == target {
+			length := j - i + 1
+			allAns = append(allAns, length+dp[i])
+			dp[j+1] = min2(dp[j], length)
+		} else {
+			dp[j+1] = dp[j]
+		}
 	}
-	return -1
+	sort.Ints(allAns)
+	if len(allAns) < 2 || allAns[0] > len(arr) {
+		return -1
+	}
+	return allAns[0]
 }
+func sumOfSlice(s []int, i, j int) int {
+	sum := s[j]
+	for _, e := range s[i:j] {
+		sum += e
+	}
+	return sum
+}
+
 func max(a, b int) int {
 	if a > b {
 		return a
