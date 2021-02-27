@@ -2,48 +2,52 @@ package main
 
 import (
 	"fmt"
-	"sort"
 )
 
 func main() {
-	//fmt.Println(minSumOfLengths([]int{1,2,2,3,2,6,7,2,1,4,},5))
-	//fmt.Println(minSumOfLengths([]int{1,6,1},7))
-	//fmt.Println(minSumOfLengths([]int{3,1,1,1,5,1,2,1},3))
-	fmt.Println(minSumOfLengths([]int{1, 1, 1, 2, 2, 2, 4, 4}, 6))
+	fmt.Println(countSubstrings("aaaaa"))
 }
-func minSumOfLengths(arr []int, target int) int {
+func countSubstrings(s string) int {
 	/*
-		参考：https://leetcode-cn.com/problems/find-two-non-overlapping-sub-arrays-each-with-target-sum/solution/xiang-xi-jiang-jie-yi-xia-shuang-zhi-zhe-jjt9/
-		双指针 动态规划
-		通过双指针来找符合条件的子数组
-		通过动态规划来判断是否越界
-		dp[i]: i元素之前满足的最小子数组长度
+			dp[i][j] : s[i~j]是否为回文
+			dp[i][j] = s[i] == s[j] && dp[i+1][j-1]
+			dp[0][0] = 0
+
+		 	0 0 0 0 0 0
+		    0 1 0 0 0 0
+			0 0 1 0 0 0
+			0 0 0 1 1 1
+			0 0 0 0 1 1
+		0 0 0 0 0 1
 	*/
-	dp := make([]int, len(arr)+1)
-	dp[0] = len(arr) + 1
-	allAns := make([]int, 0)
-	i := 0
-	j := 0
-	sum := 0
-	for ; j < len(arr); j++ {
-		sum += arr[j]
-		for sum > target {
-			sum -= arr[i]
-			i++
-		}
-		if sum == target {
-			length := j - i + 1
-			allAns = append(allAns, length+dp[i])
-			dp[j+1] = min2(dp[j], length)
-		} else {
-			dp[j+1] = dp[j]
+	if len(s) == 0 || len(s) == 1 {
+		return len(s)
+	}
+	dp := make([][]bool, 0)
+	for i := 0; i <= len(s); i++ {
+		dpi := make([]bool, len(s)+1)
+		dp = append(dp, dpi)
+	}
+	ret := 0
+	ret += len(s)
+	for i := 1; i <= len(s); i++ {
+		dp[i][i] = true
+	}
+	for i := len(s); i >= 1; i-- {
+		for j := i + 1; j <= len(s); j++ {
+			if s[i-1] == s[j-1] {
+				if j-i == 1 {
+					dp[i][j] = true
+				} else {
+					dp[i][j] = dp[i+1][j-1]
+				}
+				if dp[i][j] {
+					ret++
+				}
+			}
 		}
 	}
-	sort.Ints(allAns)
-	if len(allAns) < 2 || allAns[0] > len(arr) {
-		return -1
-	}
-	return allAns[0]
+	return ret
 }
 func sumOfSlice(s []int, i, j int) int {
 	sum := s[j]
