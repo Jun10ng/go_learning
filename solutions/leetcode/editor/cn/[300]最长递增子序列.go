@@ -52,41 +52,23 @@ package main
 func lengthOfLIS(nums []int) int {
 	/*
 		dp[i] 从起始位置到i元素的最长上升序列
-		count[i] 从起始位置到i元素的最长上升序列个数
 	*/
 	//numOfLIS,maxLen := 0,1
 	maxLen := 1
 	dp := make([]int,len(nums))
 	// 表示以第 i 个数字结尾的序列的最长上升子序列的数量。
-	// 解题思路：相当于对count 做一次DP
-	//count := make([]int,len(nums))
 	for i,_:=range dp{
 		dp[i] = 1
-		//	count[i] = 1
 	}
 
 	for j := 0; j < len(nums) ; j++ {
 		for i := 0; i < j ; i++ {
 			if nums[i] < nums[j] {
 				dp[j] = max(dp[j],dp[i]+1)
-				//switch {
-				//case dp[i]+1 > dp[j]:
-				//	// 此时需要更新dp
-				//	dp[j] = dp[i]+1
-				//	count[j] = count[i] // 最长子序列在延续
-				//case dp[i]+1 == dp[j]:
-				//	count[j] += count[i] //出现了长度相同的最长子序列，叠加
-				//}
 			}
 		}
 		maxLen = max(dp[j],maxLen)
 	}
-	//for i,e := range dp{
-	//	if e==maxLen {
-	//		numOfLIS+=count[i]
-	//	}
-	//}
-	//return numOfLIS
 	return maxLen
 }
 func max(a, b int) int {
