@@ -5,71 +5,38 @@ import (
 )
 
 func main() {
-	fmt.Println(numDistinct("babgbag", "bag"))
-}
-func numDistinct(s string, t string) int {
+	fmt.Println(distinctSubseqII("lee"))
+	fmt.Println(distinctSubseqII("abc"))
 	/*
-			r a b b b i t
-		  r 1 1 1 1 1 1 1
-		  a	0 1 1 1 1 1 1
-		  b 0 1 1 2 3 3 3
-		  b     0 1 3 3 3
-		  i         0 3 3
-		  t
-		dp[i][i] = dp[i-1][i-1]
-		dp[i][j]
-		s[i] == t[j]
-			else dp[i-1][j-1] + dp[i][j-1]
-		else dp[i][j] = dp[i][j-1]
-
-			b a b g b a g
-		  b 1 1 2 2 3 3 3
-		  a   1 1 1 1 4 4
-		  g     0 1 1 1 5
+		a b       b
+		1 1+2     3+(4-3)
 	*/
-	dp := make([][]int, 0)
-	for i := 0; i <= len(t); i++ {
-		dpi := make([]int, len(s)+1)
-		dp = append(dp, dpi)
-	}
-	for j := 0; j <= len(s); j++ {
-		dp[0][j] = 1
-	}
-
-	for i := 1; i <= len(t); i++ {
-		for j := i; j <= len(s); j++ {
-			if t[i-1] == s[j-1] {
-				dp[i][j] = dp[i-1][j-1] + dp[i][j-1]
-			} else {
-				dp[i][j] = dp[i][j-1]
-			}
-		}
-	}
-	return dp[len(t)][len(s)]
+	//fmt.Println(distinctSubseqII("aaa"))
 }
-func sumOfSlice(s []int, i, j int) int {
-	sum := s[j]
-	for _, e := range s[i:j] {
-		sum += e
-	}
-	return sum
-}
+func distinctSubseqII(S string) int {
+	/*
+		 // dp[i] 表示 S[0..i) 中有多少个**包含空序列**的不重复子序列
+			1 + 2 + 4 + 8
 
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
+			a b         a
+			2 4     	6
+			a a         a
+			2 4-2   	4
+	*/
+	//int MOD = 1_000_000_007;
+	N := len(S)
+	dp := make([]int, N+1)
+	dp[0] = 0
 
-func min2(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
+	last := make(map[uint8]int)
 
-func min3(a, b, c int) int {
-	tmp := min2(a, b)
-	return min2(tmp, c)
+	for i := 0; i < N; i++ {
+		x := S[i]
+		t := last[x]
+		dp[i+1] = dp[i]*2 + 1 - t
+		last[x] = dp[i+1] - dp[i]
+	}
+	//dp[N]--
+	//if (dp[N] < 0) dp[N] += MOD;
+	return dp[N]
 }
