@@ -3,43 +3,69 @@ package main
 import "fmt"
 
 func main() {
-	root := &ListNode{
-		Val: 0,
+	k := 2
+	nums := []int{0}
+	vals := []int{-1, 1, -2, -4, 3}
+	obj := Constructor(k, nums)
+	for _, val := range vals {
+		fmt.Print(obj.Add(val))
 	}
-	n1 := &ListNode{
-		Val: 1,
-	}
-	n2 := &ListNode{
-		Val: 2,
-	}
-	n3 := &ListNode{
-		Val: 3,
-	}
-	//n4 := &ListNode{
-	//	Val: 4,
-	//	Next: nil,
-	//}
-	root.Next = n1
-	n1.Next, n2.Next, n3.Next = n2, n3, n1
-	rvs := hasCycle(root)
-	fmt.Print(rvs)
 }
 
-//Definition for singly-linked list.
-type ListNode struct {
-	Val  int
-	Next *ListNode
+type KthLargest struct {
+	K   int
+	Kth []int
 }
 
-func hasCycle(head *ListNode) bool {
-	fast := head
-	slow := head
-	for fast != nil && slow != nil && fast.Next != nil {
-		slow = slow.Next
-		fast = fast.Next.Next
-		if slow == fast {
-			return true
+func Constructor(k int, nums []int) KthLargest {
+	this := KthLargest{
+		k,
+		[]int{},
+	}
+	for _, num := range nums {
+		this.Add(num)
+	}
+	return this
+}
+
+func (this *KthLargest) Add(val int) int {
+	this.Insert(val)
+	if len(this.Kth) >= this.K {
+		return this.Kth[len(this.Kth)-1]
+	}
+	return this.Kth[len(this.Kth)-1]
+}
+
+func (this *KthLargest) Insert(val int) {
+	if len(this.Kth) == 0 {
+		this.Kth = append(this.Kth, val)
+		return
+	}
+	if this.Kth[len(this.Kth)-1] > val {
+		if len(this.Kth) < this.K {
+			this.Kth = append(this.Kth, val)
+		}
+		return
+	}
+	i, e := 0, 0
+	for i, e = range this.Kth {
+		if e <= val {
+			break
 		}
 	}
-	return false
+	new := make([]int, 0, len(this.Kth)+1)
+	new = append(new, this.Kth[:i]...)
+	new = append(new, val)
+	new = append(new, this.Kth[i:]...)
+	if len(new) > this.K {
+		new = new[:len(new)-1]
+	}
+	this.Kth = new
+	return
 }
+
+/**
+ * Your KthLargest object will be instantiated and called as such:
+ * obj := Constructor(k, nums);
+ * param_1 := obj.Add(val);
+ */
