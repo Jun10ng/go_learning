@@ -3,69 +3,54 @@ package main
 import "fmt"
 
 func main() {
-	k := 2
-	nums := []int{0}
-	vals := []int{-1, 1, -2, -4, 3}
-	obj := Constructor(k, nums)
-	for _, val := range vals {
-		fmt.Print(obj.Add(val))
-	}
+	nums := []int{1, -1}
+	fmt.Print(maxSlidingWindow(nums, 1))
+	fmt.Print(maxSlidingWindow([]int{1, 3, -1, -3, 5, 3, 6, 7}, 3))
+	fmt.Print(maxSlidingWindow([]int{3, -2, -3, -1, 5, 3, 6, 7}, 3))
 }
 
-type KthLargest struct {
-	K   int
-	Kth []int
-}
-
-func Constructor(k int, nums []int) KthLargest {
-	this := KthLargest{
-		k,
+func maxSlidingWindow(nums []int, k int) []int {
+	// 维护一个双端队列，滑动窗口内最大的元素始终是最左边的元素
+	// 向右滑动时，如果push进了一个新的最大值，就把新最大值左端的元素全部出队
+	// 向右滑动时，如果push进了一个非最大值，则把小于该值的元素都出队
+	ret := make([]int, 0)
+	d := &deque{
 		[]int{},
 	}
-	for _, num := range nums {
-		this.Add(num)
-	}
-	return this
-}
-
-func (this *KthLargest) Add(val int) int {
-	this.Insert(val)
-	if len(this.Kth) >= this.K {
-		return this.Kth[len(this.Kth)-1]
-	}
-	return this.Kth[len(this.Kth)-1]
-}
-
-func (this *KthLargest) Insert(val int) {
-	if len(this.Kth) == 0 {
-		this.Kth = append(this.Kth, val)
-		return
-	}
-	if this.Kth[len(this.Kth)-1] > val {
-		if len(this.Kth) < this.K {
-			this.Kth = append(this.Kth, val)
+	for i, e := range nums {
+		if d.len() >= k {
+			d.pop()
 		}
-		return
-	}
-	i, e := 0, 0
-	for i, e = range this.Kth {
-		if e <= val {
-			break
+		for d.len() > 0 && e > d.D[d.len()-1] {
+			d.popTail(i)
 		}
+		d.push(e)
+		ret = append(ret, d.max())
 	}
-	new := make([]int, 0, len(this.Kth)+1)
-	new = append(new, this.Kth[:i]...)
-	new = append(new, val)
-	new = append(new, this.Kth[i:]...)
-	if len(new) > this.K {
-		new = new[:len(new)-1]
-	}
-	this.Kth = new
-	return
+	return ret
 }
 
-/**
- * Your KthLargest object will be instantiated and called as such:
- * obj := Constructor(k, nums);
- * param_1 := obj.Add(val);
- */
+type deque struct {
+	D []int
+}
+
+func (d *deque) len() int {
+	return len(d.D)
+}
+
+func (d *deque) pop() {
+	d.D = d.D[1:]
+}
+func (d *deque) push(e int) {
+	d.D = append(d.D, e)
+}
+func (d *deque) max() int {
+	return d.D[0]
+}
+func (d *deque) popTail(i int) {
+	d.D = d.D[:len(d.D)-1]
+	//if i == d.len() {
+	//	d.D = []int{}
+	//}
+	//d.D =append(d.D[:i],d.D[i+1:]...)
+}
