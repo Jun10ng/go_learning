@@ -16,7 +16,47 @@ func main() {
 	r1.Left = r2
 	r1.Right = r3
 	r2.Left = r4
-	fmt.Println(lowestCommonAncestor(r, r4, r3))
+	fmt.Println(majorityElement([]int{3, 2, 3}))
+}
+
+func majorityElement(nums []int) int {
+	/*
+		{2,2,1,1,1,2,2}
+		[2 2 1] [1 1 2 2]
+
+	*/
+	if len(nums) == 1 {
+		return nums[0]
+	}
+	m := len(nums) / 2
+	l := majorityElement(nums[:m])
+	r := majorityElement(nums[m:])
+	if l == r {
+		return l
+	}
+	lc, rc := 0, 0
+	for _, e := range nums {
+		if e == l {
+			lc++
+		}
+		if e == r {
+			rc++
+		}
+	}
+	if lc > rc {
+		return l
+	}
+	return r
+}
+
+func myPow(x float64, n int) float64 {
+	if n == 0 {
+		return 1
+	}
+	if n%2 == 0 {
+		return myPow(x*x, n/2)
+	}
+	return x * myPow(x, n-1)
 }
 
 //Definition for a binary tree node.
