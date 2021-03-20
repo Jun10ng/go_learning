@@ -1,8 +1,6 @@
 package main
 
-import (
-	"fmt"
-)
+import "fmt"
 
 func main() {
 	r := &TreeNode{Val: 8}
@@ -16,15 +14,17 @@ func main() {
 	r1.Left, r1.Right, r2.Left = r3, r4, r5
 	//fmt.Println(generateParenthesis(3))
 
-	board := [][]byte{
-		[]byte{'A', 'B', 'C', 'E'},
-		[]byte{'S', 'F', 'C', 'S'},
-		[]byte{'A', 'D', 'E', 'E'},
-	}
-	fmt.Println(exist(board, "ABCCED"))
-	fmt.Println(exist(board, "SEE"))
-	fmt.Println(exist(board, "ABCB"))
+	fmt.Println(hammingWeight(00000000000000000000000000001011))
 
+}
+
+func hammingWeight(num uint32) int {
+	ret := 0
+	for num != 0 {
+		num = num & (num - 1)
+		ret++
+	}
+	return ret
 }
 
 // 上下左右
