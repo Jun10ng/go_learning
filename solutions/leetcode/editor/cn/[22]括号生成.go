@@ -22,68 +22,33 @@ import "container/list"
 
 
 //leetcode submit region begin(Prohibit modification and deletion)
+var penum = []string{"(",")"}
 func generateParenthesis(n int) []string {
-	ans := &[]string{}
-	line := ""
-	trace(ans,&line,n,0)
-	return *ans
-}
-func trace(ans *[]string,line *string, n,idx int){
-	if idx == n+n {
-		cp := ""
-		cp = *line
-		*ans = append(*ans,cp)
-		return
-	}
-	*line = *line + "("
-	if Ok(*line,n) {
-		trace(ans,line,n,idx+1)
-	}
-	*line = (*line)[:idx]
-	//
-	*line = *line + ")"
-	if Ok(*line,n) {
-		trace(ans,line,n,idx+1)
-	}
-}
-func Ok(s string,n int) bool {
-	left,right := 0,0
-	for _,e := range s{
-		if e=='('{
-			left++
-		}else {
-			right++
+	ret := []string{}
+
+	/*
+		每生成(, f+1,)f-- 如果f<0 说明目前的路径是无效的
+		每生成一个括号，c++ 当c == 2*n 说明完毕
+	*/
+
+	trace := func(f,c int,cur string) {}
+	trace = func(f,c int,cur string) {
+		if f<0 || f >n || c>2*n{
+			return
 		}
-	}
-	if(left>n || right >n){
-		return false
-	}
-
-	if len(s) == n+n{
-		if isOk(s){return true}
-		return false
-	}
-	return true
-}
-
-func isOk(s string) bool {
-	stack := list.New()
-	i := 0
-	stack.PushBack(s[i])
-	i++
-	for i<len(s) {
-		if s[i]=='(' {
-			stack.PushBack(s[i])
-		}else{
-			if stack.Len()>0 {
-				stack.Remove(stack.Back())
+		if c == 2*n && f==0 {
+			ret  = append(ret,cur)
+			return
+		}
+		for i,e := range penum {
+			if i==0{
+				trace(f+1,c+1,cur+e)
 			}else {
-				return false
+				trace(f-1,c+1,cur+e)
 			}
 		}
-		i++
 	}
-	return stack.Len()==0
+	trace(0,0,"")
+	return ret
 }
-
 //leetcode submit region end(Prohibit modification and deletion)

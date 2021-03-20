@@ -14,8 +14,40 @@ func main() {
 
 	r.Left, r.Right = r1, r2
 	r1.Left, r1.Right, r2.Left = r3, r4, r5
-	fmt.Println(minDepth(r))
+	fmt.Println(generateParenthesis(3))
 }
+
+var penum = []string{"(", ")"}
+
+func generateParenthesis(n int) []string {
+	ret := []string{}
+
+	/*
+		每生成(, f+1,)f-- 如果f<0 说明目前的路径是无效的
+		每生成一个括号，c++ 当c == 2*n 说明完毕
+	*/
+
+	trace := func(f, c int, cur string) {}
+	trace = func(f, c int, cur string) {
+		if f < 0 || f > n || c > 2*n {
+			return
+		}
+		if c == 2*n && f == 0 {
+			ret = append(ret, cur)
+			return
+		}
+		for i, e := range penum {
+			if i == 0 {
+				trace(f+1, c+1, cur+e)
+			} else {
+				trace(f-1, c+1, cur+e)
+			}
+		}
+	}
+	trace(0, 0, "")
+	return ret
+}
+
 func minDepth(root *TreeNode) int {
 	depth := 1
 	if root.Right == nil && root.Left == nil {
