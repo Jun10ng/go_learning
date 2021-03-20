@@ -14,7 +14,57 @@ func main() {
 
 	r.Left, r.Right = r1, r2
 	r1.Left, r1.Right, r2.Left = r3, r4, r5
-	fmt.Println(generateParenthesis(3))
+	//fmt.Println(generateParenthesis(3))
+
+	board := [][]byte{
+		[]byte{'A', 'B', 'C', 'E'},
+		[]byte{'S', 'F', 'C', 'S'},
+		[]byte{'A', 'D', 'E', 'E'},
+	}
+	fmt.Println(exist(board, "ABCCED"))
+	fmt.Println(exist(board, "SEE"))
+	fmt.Println(exist(board, "ABCB"))
+
+}
+
+// 上下左右
+var vct = [][]int{[]int{-1, 0}, []int{1, 0}, []int{0, -1}, []int{0, 1}}
+
+func exist(board [][]byte, word string) bool {
+	b := board
+	ret := false
+	trace := func(int, int, string) {}
+	trace = func(i, j int, s string) {
+		if len(s) == 0 {
+			ret = true
+			return
+		}
+		if i < 0 || j < 0 || i >= len(b) || j >= len(b[0]) {
+			return
+		}
+		if b[i][j] != s[0] {
+			return
+		}
+		var tmp byte
+		tmp, b[i][j] = b[i][j], '#'
+		for _, v := range vct {
+			trace(i+v[0], j+v[1], s[1:])
+			if ret {
+				return
+			}
+		}
+		b[i][j] = tmp
+	}
+	for i, ei := range b {
+		for j, _ := range ei {
+			trace(i, j, word)
+			if ret {
+				return ret
+			}
+		}
+	}
+	//trace(0,0,word)
+	return ret
 }
 
 var penum = []string{"(", ")"}
