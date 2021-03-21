@@ -14,10 +14,23 @@ func main() {
 	r1.Left, r1.Right, r2.Left = r3, r4, r5
 	//fmt.Println(generateParenthesis(3))
 
-	fmt.Println(hammingWeight(00000000000000000000000000001011))
+	fmt.Println(isPowerOfTwo(16))  // 10000
+	fmt.Println(isPowerOfTwo(218)) // 1111
 
 }
-
+func isPowerOfTwo(n int) bool {
+	if n == 1 {
+		return true
+	}
+	for n != 0 {
+		tail := n & (1)
+		if tail != 0 && n != 1 {
+			return false
+		}
+		n = n >> 1
+	}
+	return true
+}
 func hammingWeight(num uint32) int {
 	ret := 0
 	for num != 0 {
