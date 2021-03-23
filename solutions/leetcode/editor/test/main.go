@@ -1,249 +1,85 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func main() {
-	r := &TreeNode{Val: 8}
-	r1 := &TreeNode{Val: 4}
-	r2 := &TreeNode{Val: 3}
-	r3 := &TreeNode{Val: 5}
-	r4 := &TreeNode{Val: 2}
-	r5 := &TreeNode{Val: 9}
 
-	r.Left, r.Right = r1, r2
-	r1.Left, r1.Right, r2.Left = r3, r4, r5
 	//fmt.Println(generateParenthesis(3))
 
-	fmt.Println(isPowerOfTwo(16))  // 10000
-	fmt.Println(isPowerOfTwo(218)) // 1111
-
-}
-func isPowerOfTwo(n int) bool {
-	if n == 1 {
-		return true
-	}
-	for n != 0 {
-		tail := n & (1)
-		if tail != 0 && n != 1 {
-			return false
-		}
-		n = n >> 1
-	}
-	return true
-}
-func hammingWeight(num uint32) int {
-	ret := 0
-	for num != 0 {
-		num = num & (num - 1)
-		ret++
-	}
-	return ret
+	fmt.Println(minDistance("horse", "ros"))
 }
 
-// 上下左右
-var vct = [][]int{[]int{-1, 0}, []int{1, 0}, []int{0, -1}, []int{0, 1}}
+type Mem [][]int
 
-func exist(board [][]byte, word string) bool {
-	b := board
-	ret := false
-	trace := func(int, int, string) {}
-	trace = func(i, j int, s string) {
-		if len(s) == 0 {
-			ret = true
-			return
-		}
-		if i < 0 || j < 0 || i >= len(b) || j >= len(b[0]) {
-			return
-		}
-		if b[i][j] != s[0] {
-			return
-		}
-		var tmp byte
-		tmp, b[i][j] = b[i][j], '#'
-		for _, v := range vct {
-			trace(i+v[0], j+v[1], s[1:])
-			if ret {
-				return
-			}
-		}
-		b[i][j] = tmp
-	}
-	for i, ei := range b {
-		for j, _ := range ei {
-			trace(i, j, word)
-			if ret {
-				return ret
-			}
-		}
-	}
-	//trace(0,0,word)
-	return ret
+func (m Mem) Repalce(i, j int) int {
+	return m[i-1][j-1]
 }
-
-var penum = []string{"(", ")"}
-
-func generateParenthesis(n int) []string {
-	ret := []string{}
-
+func (m Mem) Insert(i, j int) int {
+	return m[i][j-1] // ro  ros
+}
+func (m Mem) Delete(i, j int) int {
+	return m[i-1][j] // ros ro
+}
+func minDistance(word1 string, word2 string) int {
 	/*
-		每生成(, f+1,)f-- 如果f<0 说明目前的路径是无效的
-		每生成一个括号，c++ 当c == 2*n 说明完毕
-	*/
+		note！如果有两个string 入参，dp的状态定义一般都是二维，前ij各表示一个string
+		dp[i][j] : word1前i个字符 和 word2前j个字符的最小操作次数
 
-	trace := func(f, c int, cur string) {}
-	trace = func(f, c int, cur string) {
-		if f < 0 || f > n || c > 2*n {
-			return
-		}
-		if c == 2*n && f == 0 {
-			ret = append(ret, cur)
-			return
-		}
-		for i, e := range penum {
-			if i == 0 {
-				trace(f+1, c+1, cur+e)
+	*/
+	//dp := [][]int{}
+	dp := Mem{}
+
+	for i := 0; i <= len(word1); i++ {
+		dpi := make([]int, len(word2)+1)
+		dp = append(dp, dpi)
+		dp[i][0] = i
+	}
+	for j := 0; j <= len(word2); j++ {
+		dp[0][j] = j
+	}
+
+	//
+	for i := 1; i <= len(word1); i++ {
+		for j := 1; j <= len(word2); j++ {
+			if word1[i-1] == word2[j-1] {
+				dp[i][j] = dp[i-1][j-1]
 			} else {
-				trace(f-1, c+1, cur+e)
+				dp[i][j] = 1 + min3(dp.Delete(i, j), dp.Insert(i, j), dp.Repalce(i, j))
 			}
 		}
 	}
-	trace(0, 0, "")
-	return ret
+	return dp[len(word1)][len(word2)]
 }
-
-func minDepth(root *TreeNode) int {
-	depth := 1
-	if root.Right == nil && root.Left == nil {
-		return depth
-	}
-	l, r := 99999999, 99999999
-	if root.Left != nil {
-		l = minDepth(root.Left)
-	}
-	if root.Right != nil {
-		r = minDepth(root.Right)
-	}
-
-	if l < r {
-		return l + 1
-	}
-	return r + 1
-}
-func maxDepth(root *TreeNode) int {
-	depth := 0
-	if root == nil {
-		return depth
-	}
-
-	l := maxDepth(root.Left)
-	r := maxDepth(root.Right)
-	if l > r {
-		return l + 1
-	}
-	return r + 1
-}
-func levelOrder(root *TreeNode) [][]int {
-	if root == nil {
-		return [][]int{}
-	}
-	ret := [][]int{}
-	q := &queue{}
-	q.push(root)
-	for len(*q) != 0 {
-		reti := make([]int, 0, len(*q))
-		size := len(*q)
-		for i := 0; i < size; i++ {
-			e := (*q)[0]
-			reti = append(reti, e.Val)
-			if e.Left != nil {
-				q.push(e.Left)
+func minimumTotal(triangle [][]int) int {
+	cur := []int{}
+	pre := []int{}
+	for i, e := range triangle {
+		pi := i - 1
+		if pi < 0 {
+			cur = append(cur, e[0])
+		} else {
+			for ei, ee := range e {
+				if ei-1 < 0 {
+					cur = append(cur, pre[ei]+ee)
+				} else if ei == len(e)-1 {
+					cur = append(cur, pre[ei-1]+ee)
+				} else {
+					cur = append(cur, min2(pre[ei], pre[ei-1])+ee)
+				}
 			}
-			if e.Right != nil {
-				q.push(e.Right)
-			}
-			_ = q.pop()
 		}
-		ret = append(ret, reti)
+		pre = cur
+		cur = make([]int, 0)
 	}
-	return ret
+	min := 9999999999
+	for _, ei := range pre {
+		min = min2(min, ei)
+	}
+	return min
 }
 
-type queue []*TreeNode
-
-func (q *queue) push(t *TreeNode) {
-	*q = append(*q, t)
-}
-func (q *queue) pop() *TreeNode {
-	e := (*q)[0]
-	(*q) = (*q)[1:]
-	return e
-}
-
-func majorityElement(nums []int) int {
-	/*
-		{2,2,1,1,1,2,2}
-		[2 2 1] [1 1 2 2]
-
-	*/
-	if len(nums) == 1 {
-		return nums[0]
-	}
-	m := len(nums) / 2
-	l := majorityElement(nums[:m])
-	r := majorityElement(nums[m:])
-	if l == r {
-		return l
-	}
-	lc, rc := 0, 0
-	for _, e := range nums {
-		if e == l {
-			lc++
-		}
-		if e == r {
-			rc++
-		}
-	}
-	if lc > rc {
-		return l
-	}
-	return r
-}
-
-func myPow(x float64, n int) float64 {
-	if n == 0 {
-		return 1
-	}
-	if n%2 == 0 {
-		return myPow(x*x, n/2)
-	}
-	return x * myPow(x, n-1)
-}
-
-//Definition for a binary tree node.
-type TreeNode struct {
-	Val   int
-	Left  *TreeNode
-	Right *TreeNode
-}
-
-func lowestCommonAncestor(root, p, q *TreeNode) *TreeNode {
-	if root == nil {
-		return nil
-	}
-	if root.Val == p.Val || root.Val == q.Val {
-		return root
-	}
-	l := lowestCommonAncestor(root.Left, p, q)
-	r := lowestCommonAncestor(root.Right, p, q)
-	if l == nil {
-		return r
-	}
-	if r == nil {
-		return l
-	}
-	// 左右子树各找到一个 就返回root
-	return root
-}
 func max2(a, b int) int {
 	if a > b {
 		return a
@@ -255,4 +91,8 @@ func min2(a, b int) int {
 		return a
 	}
 	return b
+}
+func min3(a, b, c int) int {
+	t := min2(a, b)
+	return min2(t, c)
 }
