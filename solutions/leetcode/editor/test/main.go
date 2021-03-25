@@ -3,29 +3,22 @@ package main
 import "fmt"
 
 func main() {
-	//n := [][]byte{
-	//	{'1','1','1'},
-	//	{'0','1','0'},
-	//	{'1','1','1'},
-	//}
-	n := [][]byte{
-		{'1'},
-		{'1'},
+
+	n := [][]int{
+		{1, 0, 0, 1},
+		{0, 1, 1, 0},
+		{0, 1, 1, 1},
+		{1, 0, 1, 1},
 	}
-	fmt.Println(numIslands(n))
+	fmt.Println(findCircleNum(n))
 }
 
-func numIslands(grid [][]byte) int {
-	u := NewUnionFindSet(grid)
-	for i, ei := range grid {
-		for j, ej := range ei {
-			if ej == '1' {
-				for _, v := range [][]int{{-1, 0}, {1, 0}, {0, -1}, {0, 1}} {
-					vi, vj := i+v[0], j+v[1]
-					if vi >= 0 && vj >= 0 && vi < u.M && vj < u.N && grid[vi][vj] == '1' {
-						u.Union(i*u.N+j, vi*u.N+vj)
-					}
-				}
+func findCircleNum(isConnected [][]int) int {
+	u := NewUnionFindSet(isConnected)
+	for i := 0; i < u.M; i++ {
+		for j := i + 1; j < u.M; j++ {
+			if isConnected[i][j] == 1 {
+				u.Union(i, j)
 			}
 		}
 	}
@@ -34,31 +27,25 @@ func numIslands(grid [][]byte) int {
 
 type UnionFindSet struct {
 	M, N, Cnt int
-	Grid      [][]byte
+	Grid      [][]int
 	Parent    []int
 	Rank      []int //深度
 }
 
-func NewUnionFindSet(g [][]byte) *UnionFindSet {
+func NewUnionFindSet(g [][]int) *UnionFindSet {
 	m := len(g)
 	n := len(g[0])
 	cnt := 0
 	if n == 0 {
 		return &UnionFindSet{}
 	}
-	p := make([]int, m*n)
-	r := make([]int, m*n)
+	p := make([]int, m)
+	r := make([]int, m)
 	for i, _ := range p {
-		p[i] = -1
+		p[i] = i
+		cnt++
 	}
-	for i, ei := range g {
-		for j, ej := range ei {
-			if ej == '1' {
-				p[i*n+j] = i*n + j
-				cnt++
-			}
-		}
-	}
+
 	return &UnionFindSet{
 		Grid:   g,
 		Parent: p,
@@ -94,6 +81,87 @@ func (u *UnionFindSet) Union(x, y int) {
 		u.Cnt--
 	}
 }
+
+//
+//func numIslands(grid [][]byte) int {
+//	u := NewUnionFindSet(grid)
+//	for i, ei := range grid {
+//		for j, ej := range ei {
+//			if ej == '1' {
+//				for _, v := range [][]int{{-1, 0}, {1, 0}, {0, -1}, {0, 1}} {
+//					vi, vj := i+v[0], j+v[1]
+//					if vi >= 0 && vj >= 0 && vi < u.M && vj < u.N && grid[vi][vj] == '1' {
+//						u.Union(i*u.N+j, vi*u.N+vj)
+//					}
+//				}
+//			}
+//		}
+//	}
+//	return u.Cnt
+//}
+//
+//type UnionFindSet struct {
+//	M, N, Cnt int
+//	Grid      [][]byte
+//	Parent    []int
+//	Rank      []int //深度
+//}
+//
+//func NewUnionFindSet(g [][]byte) *UnionFindSet {
+//	m := len(g)
+//	n := len(g[0])
+//	cnt := 0
+//	if n == 0 {
+//		return &UnionFindSet{}
+//	}
+//	p := make([]int, m*n)
+//	r := make([]int, m*n)
+//	for i, _ := range p {
+//		p[i] = -1
+//	}
+//	for i, ei := range g {
+//		for j, ej := range ei {
+//			if ej == '1' {
+//				p[i*n+j] = i*n + j
+//				cnt++
+//			}
+//		}
+//	}
+//	return &UnionFindSet{
+//		Grid:   g,
+//		Parent: p,
+//		Rank:   r,
+//		M:      m,
+//		N:      n,
+//		Cnt:    cnt,
+//	}
+//}
+//func (u *UnionFindSet) Find(index int) int {
+//	if u.Parent[index] == index { //找到根节点
+//		return index
+//	}
+//	return u.Find(u.Parent[index]) // 递归子节点
+//}
+//
+//func (u *UnionFindSet) Union(x, y int) {
+//	rootx := u.Find(x)
+//	rooty := u.Find(y)
+//	if rootx != rooty {
+//		//两个节点 根节点不一样，
+//		//但是两个节点相邻，所以进行union,cnt--
+//		//把深度(rank)小的一方指向深度大的
+//		if u.Rank[rootx] > u.Rank[rooty] {
+//			u.Parent[rooty] = rootx
+//		} else if u.Rank[rooty] > u.Rank[rootx] {
+//			u.Parent[rootx] = rooty
+//		} else {
+//			// 两个节点深度相同，选择让rooty指向rootx，rootx深度+1
+//			u.Parent[rooty] = rootx
+//			u.Rank[rootx]++
+//		}
+//		u.Cnt--
+//	}
+//}
 
 type Mem [][]int
 
