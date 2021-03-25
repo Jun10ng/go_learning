@@ -3,84 +3,146 @@ package main
 import "fmt"
 
 func main() {
-
-	n := [][]int{
-		{1, 0, 0, 1},
-		{0, 1, 1, 0},
-		{0, 1, 1, 1},
-		{1, 0, 1, 1},
-	}
-	fmt.Println(findCircleNum(n))
+	fmt.Println(longestConsecutive([]int{1, 2, 0, 1}))
 }
 
-func findCircleNum(isConnected [][]int) int {
-	u := NewUnionFindSet(isConnected)
-	for i := 0; i < u.M; i++ {
-		for j := i + 1; j < u.M; j++ {
-			if isConnected[i][j] == 1 {
-				u.Union(i, j)
-			}
+func longestConsecutive(nums []int) int {
+	u := NewUnionFindSet(nums)
+	pre := make(map[int]int, len(nums))
+	for i, e := range nums {
+		if _, exist := pre[e]; exist {
+			continue
 		}
+		if prei, ok := pre[e+1]; ok {
+			u.Union(i, prei)
+		}
+		if prei, ok := pre[e-1]; ok {
+			u.Union(i, prei)
+		}
+		pre[e] = i
 	}
-	return u.Cnt
+	return u.LC
 }
 
 type UnionFindSet struct {
-	M, N, Cnt int
-	Grid      [][]int
-	Parent    []int
-	Rank      []int //深度
+	M      int
+	Nums   []int
+	Parent []int
+	Rank   []int
+	LC     int
 }
 
-func NewUnionFindSet(g [][]int) *UnionFindSet {
-	m := len(g)
-	n := len(g[0])
-	cnt := 0
-	if n == 0 {
+func NewUnionFindSet(nums []int) *UnionFindSet {
+	m := len(nums)
+	if m == 0 {
 		return &UnionFindSet{}
 	}
+
 	p := make([]int, m)
 	r := make([]int, m)
 	for i, _ := range p {
-		p[i] = i
-		cnt++
+		p[i] = i //每个元素的父亲都是自己
+		r[i] = 1
 	}
-
 	return &UnionFindSet{
-		Grid:   g,
+		M:      m,
+		Nums:   nums,
 		Parent: p,
 		Rank:   r,
-		M:      m,
-		N:      n,
-		Cnt:    cnt,
+		LC:     1,
 	}
 }
-func (u *UnionFindSet) Find(index int) int {
-	if u.Parent[index] == index { //找到根节点
-		return index
+func (u *UnionFindSet) find(x int) int {
+	px := u.Parent[x]
+	if u.Parent[x] == x { //找到父节点
+		return x
 	}
-	return u.Find(u.Parent[index]) // 递归子节点
+	return u.find(px)
+}
+func (u *UnionFindSet) Union(x, y int) {
+	px := u.find(x)
+	py := u.find(y)
+	if px != py {
+		if u.Nums[x] > u.Nums[y] {
+			u.Parent[x] = py
+			u.Rank[py] += u.Rank[x]
+			u.LC = max2(u.Rank[py], u.LC)
+		} else {
+			u.Parent[y] = px
+			u.Rank[px] += u.Rank[y]
+			u.LC = max2(u.Rank[px], u.LC)
+		}
+	}
 }
 
-func (u *UnionFindSet) Union(x, y int) {
-	rootx := u.Find(x)
-	rooty := u.Find(y)
-	if rootx != rooty {
-		//两个节点 根节点不一样，
-		//但是两个节点相邻，所以进行union,cnt--
-		//把深度(rank)小的一方指向深度大的
-		if u.Rank[rootx] > u.Rank[rooty] {
-			u.Parent[rooty] = rootx
-		} else if u.Rank[rooty] > u.Rank[rootx] {
-			u.Parent[rootx] = rooty
-		} else {
-			// 两个节点深度相同，选择让rooty指向rootx，rootx深度+1
-			u.Parent[rooty] = rootx
-			u.Rank[rootx]++
-		}
-		u.Cnt--
-	}
-}
+//func findCircleNum(isConnected [][]int) int {
+//	u := NewUnionFindSet(isConnected)
+//	for i := 0; i < u.M; i++ {
+//		for j := i + 1; j < u.M; j++ {
+//			if isConnected[i][j] == 1 {
+//				u.Union(i, j)
+//			}
+//		}
+//	}
+//	return u.Cnt
+//}
+//
+//type UnionFindSet struct {
+//	M, N, Cnt int
+//	Grid      [][]int
+//	Parent    []int
+//	Rank      []int //深度
+//}
+//
+//func NewUnionFindSet(g [][]int) *UnionFindSet {
+//	m := len(g)
+//	n := len(g[0])
+//	cnt := 0
+//	if n == 0 {
+//		return &UnionFindSet{}
+//	}
+//	p := make([]int, m)
+//	r := make([]int, m)
+//	for i, _ := range p {
+//		p[i] = i
+//		cnt++
+//	}
+//
+//	return &UnionFindSet{
+//		Grid:   g,
+//		Parent: p,
+//		Rank:   r,
+//		M:      m,
+//		N:      n,
+//		Cnt:    cnt,
+//	}
+//}
+//func (u *UnionFindSet) Find(index int) int {
+//	if u.Parent[index] == index { //找到根节点
+//		return index
+//	}
+//	return u.Find(u.Parent[index]) // 递归子节点
+//}
+//
+//func (u *UnionFindSet) Union(x, y int) {
+//	rootx := u.Find(x)
+//	rooty := u.Find(y)
+//	if rootx != rooty {
+//		//两个节点 根节点不一样，
+//		//但是两个节点相邻，所以进行union,cnt--
+//		//把深度(rank)小的一方指向深度大的
+//		if u.Rank[rootx] > u.Rank[rooty] {
+//			u.Parent[rooty] = rootx
+//		} else if u.Rank[rooty] > u.Rank[rootx] {
+//			u.Parent[rootx] = rooty
+//		} else {
+//			// 两个节点深度相同，选择让rooty指向rootx，rootx深度+1
+//			u.Parent[rooty] = rootx
+//			u.Rank[rootx]++
+//		}
+//		u.Cnt--
+//	}
+//}
 
 //
 //func numIslands(grid [][]byte) int {
