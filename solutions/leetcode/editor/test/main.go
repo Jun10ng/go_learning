@@ -1,9 +1,47 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func main() {
-	fmt.Println(longestConsecutive([]int{1, 2, 0, 1}))
+	//fmt.Println(longestConsecutive([]int{1, 2, 0, 1}))
+	//fmt.Println(findMedianSortedArrays([]int{1,3,5,8},[]int{2,4,6,7})) // 4.5
+	fmt.Println(findMedianSortedArrays([]int{1}, []int{2, 3, 4, 5, 6}))
+}
+func findMedianSortedArrays(nums1 []int, nums2 []int) float64 {
+	findKth := func(k int) float64 {
+		i, j := 0, 0
+		for {
+			//某个序列为空
+			if i == len(nums1) {
+				return float64(nums2[j+k-1])
+			}
+			if j == len(nums2) {
+				return float64(nums1[i+k-1])
+			}
+			if k == 1 {
+				return float64(min2(nums1[i], nums2[j]))
+			}
+			halfK := k/2 - 1
+			newi := min2(i+halfK, len(nums1)-1)
+			newj := min2(j+halfK, len(nums2)-1)
+			if nums1[newi] < nums2[newj] {
+				k = k - (newi - i + 1)
+				i = newi + 1
+			} else {
+				k = k - (newj - j + 1)
+				j = newj + 1
+			}
+		}
+	}
+	l1, l2 := len(nums1), len(nums2)
+	isEven := (l1+l2)&1 == 0
+	mid := (l1 + l2) / 2
+	if isEven {
+		return (findKth(mid+1) + findKth(mid)) / 2
+	}
+	return findKth(mid + 1)
 }
 
 func longestConsecutive(nums []int) int {

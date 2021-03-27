@@ -31,46 +31,44 @@ package main
 
 //leetcode submit region begin(Prohibit modification and deletion)
 //这道题的实质是取两个数组的第K个最小值
-//
+// 长度为偶数时，就是第K小和第K+1小值 相加除二
+// 如果使用双指针的解法没法解决两个中位数都在一个数组内
 func findMedianSortedArrays(nums1 []int, nums2 []int) float64 {
-	sumLen := len(nums2)+len(nums1)
-	k := sumLen/2
-	if sumLen % 2 == 0{
-		return float64((getKthMin(nums1,nums2,k)+getKthMin(nums1,nums2,k+1)))/2.0
-	}else{
-		return float64(getKthMin(nums1,nums2,k+1))
+	findKth := func(k int)float64{
+		i,j := 0,0
+		for {
+			//某个序列为空
+			if i == len(nums1){
+				return float64(nums2[j + k -1])
+			}
+			if j == len(nums2){
+				return float64(nums1[i + k -1])
+			}
+			if k==1{
+				return float64(min2(nums1[i],nums2[j]))
+			}
+			halfK := k/2-1
+			newi := min2(i + halfK,len(nums1)-1)
+			newj := min2(j + halfK,len(nums2)-1)
+			if nums1[newi]<nums2[newj]{
+				k = k- (newi - i + 1)
+				i = newi + 1
+			}else {
+				k = k- (newj - j + 1)
+				j = newj + 1
+			}
+		}
 	}
+	l1,l2 := len(nums1),len(nums2)
+	isEven := (l1+l2) & 1 == 0
+	mid := (l1+l2)/2
+	if isEven{
+		return (findKth(mid+1)+findKth(mid))/2
+	}
+	return findKth(mid+1)
 }
 
-func getKthMin(num1,num2 []int,k int) int {
-	i,j := 0,0
-	for{
-		//某个序列为空
-		if i == len(num1){
-			return num2[j + k -1]
-		}
-		if j == len(num2){
-			return num1[i + k -1]
-		}
-		// 出口
-		if k == 1 {
-			return min(num1[i], num2[j])
-		}
-		//正常情况
-		half := k/2
-		newi := min(i+half,len(num1))-1
-		newj := min(j+half,len(num2))-1
-		p1,p2 := num1[newi],num2[newj]
-		if p1<=p2{
-			k = k - (newi - i + 1)
-			i = newi + 1
-		}else {
-			k = k - (newj - j + 1)
-			j = newj + 1
-		}
-	}
-}
-func min(x, y int) int {
+func min2(x, y int) int {
 	if x < y {
 		return x
 	}
