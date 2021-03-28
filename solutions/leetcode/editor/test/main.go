@@ -1,14 +1,74 @@
 package main
 
 import (
+	"container/heap"
 	"fmt"
+	"sort"
+	"strings"
 )
 
 func main() {
-	//fmt.Println(longestConsecutive([]int{1, 2, 0, 1}))
-	//fmt.Println(findMedianSortedArrays([]int{1,3,5,8},[]int{2,4,6,7})) // 4.5
-	fmt.Println(findMedianSortedArrays([]int{1}, []int{2, 3, 4, 5, 6}))
+	fmt.Println(helper("1232"))
 }
+
+// 输出num的排列组合
+func helper(str string) []string {
+	strs := strings.Split(str, "")
+	sort.Strings(strs)
+	str = strings.Join(strs, "")
+	strList := make([]string, 0)
+
+	vis := make([]bool, len(str))
+	trace := func(cur string) {}
+	trace = func(cur string) {
+		if len(cur) == len(str) {
+			strList = append(strList, cur)
+			return
+		}
+		for i := 0; i < len(str); i++ {
+			se := string(str[i])
+			if !vis[i] && !(i != 0 && vis[i-1] && str[i] == str[i-1]) {
+				vis[i] = true
+				trace(cur + se)
+				vis[i] = false
+			}
+		}
+	}
+	trace("")
+	return strList
+}
+
+type IntHeap []int
+
+func (h *IntHeap) Len() int {
+	return len((*h))
+}
+func (h *IntHeap) Less(i, j int) bool {
+	return (*h)[i] < (*h)[j]
+}
+func (h *IntHeap) Swap(i, j int) {
+	(*h)[i], (*h)[j] = (*h)[j], (*h)[i]
+}
+func (h *IntHeap) Push(e interface{}) {
+	*h = append(*h, e.(int))
+}
+func (h *IntHeap) Pop() interface{} {
+	ret := (*h)[len(*h)-1]
+	*h = (*h)[0 : len(*h)-1]
+	return ret
+}
+func findKthLargest(nums []int, k int) int {
+	h := &IntHeap{}
+	heap.Init(h)
+	for i, e := range nums {
+		heap.Push(h, e)
+		if i >= k {
+			heap.Pop(h)
+		}
+	}
+	return (*h)[0]
+}
+
 func findMedianSortedArrays(nums1 []int, nums2 []int) float64 {
 	findKth := func(k int) float64 {
 		i, j := 0, 0

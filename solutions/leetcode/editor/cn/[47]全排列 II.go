@@ -55,15 +55,6 @@ func trace(nums []int, t []int,used []bool,ans *[][]int) {
 	return
 }
 
-func isContains(t []int, n int) bool {
-	for _,e := range t{
-		if e ==n {
-			return true
-		}
-	}
-	return false
-}
-
 func removeLast(t []int) []int {
 	return t[:len(t)-1]
 }
