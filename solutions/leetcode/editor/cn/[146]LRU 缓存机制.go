@@ -58,29 +58,28 @@ package main
 
 //leetcode submit region begin(Prohibit modification and deletion)
 
+
 type LRUCache struct {
-	cap int
-	m map[int]*node
+	cap  int
+	m    map[int]*node
 	head *node
 	tail *node
 }
 type node struct {
-	key int
+	key   int
 	value int
-	next *node
-	pre *node
+	next  *node
+	pre   *node
 }
-
 
 func Constructor(capacity int) LRUCache {
 	return LRUCache{
 		capacity,
-		make(map[int]*node,capacity),
+		make(map[int]*node, capacity),
 		&node{},
 		&node{},
 	}
 }
-
 
 func (this *LRUCache) Get(key int) int {
 	var n *node
@@ -89,13 +88,13 @@ func (this *LRUCache) Get(key int) int {
 		return -1
 	}
 	// 提前
-	if this.tail.value == n.value{
+	if this.tail.value == n.value {
 		this.tail = this.tail.pre
 	}
 	pre := n.pre
 	nxt := n.next
 	pre.next = nxt
-	if nxt!=nil {
+	if nxt != nil {
 		nxt.pre = pre
 	}
 	n.next = this.head
@@ -104,31 +103,28 @@ func (this *LRUCache) Get(key int) int {
 	return n.value
 }
 
-func (this *LRUCache) Put(key int, value int)  {
+func (this *LRUCache) Put(key int, value int) {
 	n := &node{
-		key: key,
+		key:   key,
 		value: value,
 	}
-	if len(this.m)==0{
+	if len(this.m) == 0 {
 		this.tail = n
-	}else {
+	} else {
 		n.next = this.head
 		this.head.pre = n
 	}
 	this.m[key] = n
 	this.head = n
-	if  len(this.m) > this.cap  {
+	if len(this.m) > this.cap {
 		d := this.tail
 		this.tail = this.tail.pre
 		if d != nil {
-			delete(this.m,d.key)
+			delete(this.m, d.key)
 			d = nil
 		}
 	}
 }
-
-
-
 
 
 /**
