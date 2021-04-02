@@ -1,0 +1,50 @@
+cp /Users/junlongliu/github/go_learning/osx-protoc /usr/local/bin/protoc
+cp /Users/junlongliu/github/go_learning/protoc-gen-go /usr/local/bin/protoc-gen-go
+#cd $GOPATH/src/github.com/golang/protobuf/protoc-gen-go
+#go build
+#cp $GOPATH/bin/protoc-gen-go /usr/local/bin/protoc-gen-go
+#cp $GOPATH/bin/protoc-gen-go-grpc /usr/local/bin/protoc-gen-go-grpc
+#cp
+#cd $GOPATH/src/github.com/golang/protobuf/protoc-gen-go
+#go build
+
+#set -e
+## 创建临时目录并且在脚本退出时删除
+#TEMP_DIR=$(mktemp -d)
+##trap 'rm -rf "${TEMP_DIR}"' EXIT
+#
+#pushd ${TEMP_DIR} > /dev/null
+##git clone --depth 1 git@github.com:protocolbuffers/protobuf.git
+#if which protoc > /dev/null; then
+#    echo "Remove exist protoc"
+#    rm -rf $(which -a protoc)
+#fi
+#
+#if which protoc-gen-go > /dev/null; then
+#    echo "Remove exist protoc-gen-go"
+#    rm -rf $(which -a protoc-gen-go)
+#fi
+#protoc_version="3.15.5"
+#protoc_gen_version="1.3.5"
+#
+## Install protoc
+#echo "Install protoc ${protoc_version}" >&2
+#
+#cp /Users/junlongliu/github/go_learning/os-protoc /usr/local/bin/protoc
+#
+#echo "Install protoc-gen-go ${protoc_gen_version}"
+#
+## Install protoc-gen-go
+#TEMP_DIR=$(mktemp -d)
+#trap 'rm -rf "${TEMP_DIR}"' EXIT # Remove temp dir
+#
+#mkdir -p ${TEMP_DIR}/src/github.com/golang
+#ln -sf ${PWD}/vendor/protoc-gen-go/${protoc_gen_version} \
+#    ${TEMP_DIR}/src/github.com/golang/protobuf >/dev/null
+#
+#pushd ${TEMP_DIR} >/dev/null
+#cd ./src/github.com/golang/protobuf/protoc-gen-go
+#mkdir -p ${GOPATH}/bin
+#go build -o ${TEMP_DIR}/bin/protoc-gen-go .
+#cp ${TEMP_DIR}/bin/protoc-gen-go /usr/local/bin/protoc-gen-go
+#popd >/dev/null

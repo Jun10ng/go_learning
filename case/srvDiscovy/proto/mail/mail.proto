@@ -1,0 +1,17 @@
+syntax = "proto3"; // 版本声明，使用Protocol Buffers v3版本
+option go_package = "protobuf/mail";
+package  g.srv.mail; // 包名
+// 创建一个邮件服务
+service MailService {
+  rpc SendMail (MailRequest) returns (MailResponse) {
+  }
+}
+// 请求消息
+message MailRequest {
+   string Mail = 1;
+   string Text = 2;
+}
+// 响应消息
+message MailResponse {
+   bool Ok = 1;
+}
