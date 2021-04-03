@@ -14,11 +14,10 @@ import (
 )
 
 type service struct {
-	pb.UnimplementedMailServiceServer
 }
 
 func (s *service) SendMail(ctx context.Context, req *pb.MailRequest) (res *pb.MailResponse, err error) {
-	fmt.Printf("邮箱:%s;发送内容:%s", req.Mail, req.Text)
+	fmt.Printf("邮箱: %s;\n发送内容:%s\n", req.Mail, req.Text)
 	return &pb.MailResponse{
 		Ok: true,
 	}, nil
