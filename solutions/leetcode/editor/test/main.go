@@ -2,24 +2,85 @@ package main
 
 import (
 	"container/heap"
-	"fmt"
 	"sort"
 	"strings"
 )
 
 func main() {
+	moveZeroes([]int{0, 1, 0, 3, 12})
+}
 
-	lRUCache := Constructor(1)
-	lRUCache.Put(2, 2)           // 缓存是 {1=1}
-	lRUCache.Put(1, 1)           // 缓存是 {1=1, 2=2}
-	fmt.Println(lRUCache.Get(2)) // 返回 1
-	//lRUCache.Put(3, 3)           // 该操作会使得关键字 2 作废，缓存是 {1=1, 3=3}
-	//fmt.Println(lRUCache.Get(2)) // 返回 -1 (未找到)
-	//lRUCache.Put(4, 4)           // 该操作会使得关键字 1 作废，缓存是 {4=4, 3=3}
-	//fmt.Println(lRUCache.Get(1)) // 返回 -1 (未找到)
-	//fmt.Println(lRUCache.Get(3)) // 返回 3
-	//fmt.Println(lRUCache.Get(4)) // 返回 4
+func moveZeroes(nums []int) {
+	length := len(nums)
+	for i := 0; i < length; {
+		if nums[i] != 0 {
+			i++
+			continue
+		}
+		nums = append(nums[:i], nums[i+1:]...)
+		nums = append(nums, 0)
+		length--
+	}
+}
+func threeSum(nums []int) [][]int {
+	sort.Ints(nums)
+	ret := make([][]int, 0)
+	//m := make(map[int]int,len(nums))
+	//for index:=0;index<len(nums);index++{
+	//	value := nums[index]
+	//	m[value] = index
+	//}
 
+	for i := 0; i < len(nums); i++ {
+		if nums[i] > 0 {
+			return ret
+		}
+		if i > 0 && nums[i] == nums[i-1] {
+			continue
+		}
+		l, r := i+1, len(nums)-1
+		for l < r {
+			s := nums[i] + nums[l] + nums[r]
+			if s < 0 {
+				l++
+				for l < r && nums[l] == nums[l-1] {
+					l++
+				}
+			} else if s > 0 {
+				r--
+				for l < r && nums[r] == nums[r+1] {
+					r--
+				}
+			} else {
+				ret = append(ret, []int{nums[i], nums[l], nums[r]})
+				l++
+				r--
+				for l < r && nums[l] == nums[l-1] {
+					l++
+				}
+				for l < r && nums[r] == nums[r+1] {
+					r--
+				}
+			}
+		}
+
+	}
+	return ret
+}
+func maxArea(height []int) int {
+	// 双指针
+	l, r := 0, len(height)-1
+	area := 0
+	for l < r {
+		a := min2(height[l], height[r]) * (r - l)
+		area = max2(a, area)
+		if height[l] < height[r] {
+			l++
+		} else {
+			r--
+		}
+	}
+	return area
 }
 
 type LRUCache struct {
