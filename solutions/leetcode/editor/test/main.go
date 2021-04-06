@@ -2,14 +2,149 @@ package main
 
 import (
 	"container/heap"
+	"fmt"
 	"sort"
 	"strings"
 )
 
 func main() {
-	moveZeroes([]int{0, 1, 0, 3, 12})
+	//merge([]int{1,2,3,0,0,0},3,[]int{2,5,6},3)
+	//merge([]int{3,4,5,0,0,0},3,[]int{1,5,6},3)
+	fmt.Println(groupAnagrams([]string{"eat", "tea", "tan", "ate", "nat", "bat"}))
+}
+func groupAnagrams(strs []string) [][]string {
+	ret := make([][]string, 0)
+	m := make(map[string]int)
+	for _, v := range strs {
+		vs := strings.Split(v, "")
+		sort.Strings(vs)
+		key := strings.Join(vs, "")
+		index, ok := 0, false
+		if index, ok = m[key]; ok {
+		} else {
+			ret = append(ret, []string{})
+			m[key] = len(m)
+			index = m[key]
+		}
+		ret[index] = append(ret[index], v)
+	}
+	return ret
+}
+func merge(nums1 []int, m int, nums2 []int, n int) {
+	if m == 0 {
+		nums1 = nums2
+	}
+	i, j, k := m-1, n-1, n+m-1
+	for k >= 0 {
+		if j > 0 || i < 0 {
+			if j >= 0 && i < 0 {
+				for l := 0; l <= j; l++ {
+					nums1[l] = nums2[l]
+				}
+			}
+			fmt.Println(nums1)
+			return
+		}
+		if nums1[i] <= nums2[j] {
+			nums1[k] = nums2[j]
+			k--
+			j--
+			continue
+		}
+		if nums1[i] > nums2[j] {
+			nums1[k] = nums1[i]
+			i--
+			k--
+			continue
+		}
+	}
+	fmt.Println(nums1)
 }
 
+//输入：l1 = [1,2,4], l2 = [3]
+func mergeTwoLists(l1 *ListNode, l2 *ListNode) *ListNode {
+	if l1 == nil {
+		return l2
+	}
+	if l2 == nil {
+		return l1
+	}
+	if l1.Val < l2.Val {
+		l1.Next = mergeTwoLists(l1.Next, l2)
+		return l1
+	}
+	l2.Next = mergeTwoLists(l1, l2.Next)
+	return l2
+}
+
+type ListNode struct {
+	Val  int
+	Next *ListNode
+}
+
+// 反转法，时间复杂度和空间复杂度都是最优的
+func rotate(nums []int, k int) {
+	n := len(nums)
+	if k == n {
+		return
+	}
+
+	// 翻转函数
+	reserve := func(ns []int) {
+		for l, r := 0, len(ns)-1; l < r; {
+			ns[l], ns[r] = ns[r], ns[l]
+			l++
+			r--
+		}
+	}
+	reserve(nums)
+	reserve(nums[:k])
+	reserve(nums[k:])
+}
+func rotate1(nums []int, k int) {
+	i := 0
+	n := len(nums)
+	for i < k {
+		t := nums[n-1]
+		for j := n - 1; j > 0; j-- {
+			nums[j] = nums[j-1]
+		}
+		nums[0] = t
+		i++
+	}
+}
+
+// 双指针法
+// 以q为游标遍历数组，把不同的元素丢到p指针的左侧
+func removeDuplicates(nums []int) int {
+	p, q := 0, 1
+	for q < len(nums) {
+		if nums[p] == nums[q] {
+			q++
+		} else {
+			nums[p+1] = nums[q]
+			p++
+			q++
+		}
+	}
+	return p + 1
+}
+func removeDuplicates1(nums []int) int {
+	/*
+		//输入：nums = [0,0,1,1,1,2,2,3,3,4]
+		//输出：5, nums = [0,1,2,3,4]
+	*/
+	for i := 0; i < len(nums); {
+		v := nums[i]
+		if i > 0 && v == nums[i-1] {
+			// remove
+			nums = append(nums[:i], nums[i+1:]...)
+			continue
+		}
+		i++
+	}
+	return len(nums)
+}
 func moveZeroes(nums []int) {
 	length := len(nums)
 	for i := 0; i < length; {
