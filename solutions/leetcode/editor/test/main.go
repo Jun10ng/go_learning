@@ -7,10 +7,63 @@ import (
 	"strings"
 )
 
+type ListNode struct {
+	Val  int
+	Next *ListNode
+}
+type TreeNode struct {
+	Val         int
+	Left, Right *TreeNode
+}
+
 func main() {
-	//merge([]int{1,2,3,0,0,0},3,[]int{2,5,6},3)
-	//merge([]int{3,4,5,0,0,0},3,[]int{1,5,6},3)
-	fmt.Println(groupAnagrams([]string{"eat", "tea", "tan", "ate", "nat", "bat"}))
+	n5 := &ListNode{5, nil}
+	n4 := &ListNode{4, n5}
+	n3 := &ListNode{3, n4}
+	n2 := &ListNode{2, n3}
+	n1 := &ListNode{1, n2}
+	reverseBetween(n1, 1, 3)
+	t := n1
+	for t != nil {
+		fmt.Print(t.Val)
+		t = t.Next
+	}
+}
+
+// 1 3
+// 0 2 1 3 4 5
+func reverseBetween(head *ListNode, left int, right int) *ListNode {
+	if head == nil {
+		return head
+	}
+	// new head
+	nh := &ListNode{0, head}
+	pre := nh
+	for count := 0; pre.Next != nil && count < left-1; count++ {
+		pre = pre.Next
+	}
+	if pre.Next == nil {
+		return head
+	}
+	cur := pre.Next
+	for i := 0; i < right-left; i++ {
+		tmp := pre.Next
+		pre.Next = cur.Next
+		cur.Next = cur.Next.Next
+		pre.Next.Next = tmp
+	}
+	return nh.Next
+}
+
+func inorderTraversal(root *TreeNode) []int {
+	if root == nil {
+		return []int{}
+	}
+	ret := make([]int, 0)
+	ret = append(ret, inorderTraversal(root.Left)...)
+	ret = append(ret, root.Val)
+	ret = append(ret, inorderTraversal(root.Right)...)
+	return ret
 }
 func groupAnagrams(strs []string) [][]string {
 	ret := make([][]string, 0)
@@ -61,26 +114,26 @@ func merge(nums1 []int, m int, nums2 []int, n int) {
 	fmt.Println(nums1)
 }
 
-//输入：l1 = [1,2,4], l2 = [3]
-func mergeTwoLists(l1 *ListNode, l2 *ListNode) *ListNode {
-	if l1 == nil {
-		return l2
-	}
-	if l2 == nil {
-		return l1
-	}
-	if l1.Val < l2.Val {
-		l1.Next = mergeTwoLists(l1.Next, l2)
-		return l1
-	}
-	l2.Next = mergeTwoLists(l1, l2.Next)
-	return l2
-}
-
-type ListNode struct {
-	Val  int
-	Next *ListNode
-}
+////输入：l1 = [1,2,4], l2 = [3]
+//func mergeTwoLists(l1 *ListNode, l2 *ListNode) *ListNode {
+//	if l1 == nil {
+//		return l2
+//	}
+//	if l2 == nil {
+//		return l1
+//	}
+//	if l1.Val < l2.Val {
+//		l1.Next = mergeTwoLists(l1.Next, l2)
+//		return l1
+//	}
+//	l2.Next = mergeTwoLists(l1, l2.Next)
+//	return l2
+//}
+//
+//type ListNode struct {
+//	Val  int
+//	Next *ListNode
+//}
 
 // 反转法，时间复杂度和空间复杂度都是最优的
 func rotate(nums []int, k int) {
