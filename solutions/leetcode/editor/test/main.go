@@ -16,18 +16,23 @@ type TreeNode struct {
 	Left, Right *TreeNode
 }
 
+type Node struct {
+	Val      int
+	Children []*Node
+}
+
 func main() {
-	n5 := &ListNode{5, nil}
-	n4 := &ListNode{4, n5}
-	n3 := &ListNode{3, n4}
-	n2 := &ListNode{2, n3}
-	n1 := &ListNode{1, n2}
-	reverseBetween(n1, 1, 3)
-	t := n1
-	for t != nil {
-		fmt.Print(t.Val)
-		t = t.Next
+
+}
+
+func invertTree(root *TreeNode) *TreeNode {
+	if root == nil {
+		return nil
 	}
+	root.Right, root.Left = root.Left, root.Right
+	root.Right = invertTree(root.Right)
+	root.Left = invertTree(root.Left)
+	return root
 }
 
 // 1 3
