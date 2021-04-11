@@ -4,6 +4,7 @@ import (
 	"container/heap"
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -22,7 +23,68 @@ type Node struct {
 }
 
 func main() {
+	root := &TreeNode{Val: 1}
+	r := &TreeNode{Val: 2}
+	root.Right = r
 
+	l := &TreeNode{Val: 3}
+	root.Left = l
+
+	r2 := &TreeNode{Val: 4}
+	l.Right = r2
+
+	ser := Constructor()
+	deser := Constructor()
+	data := ser.serialize(root)
+	fmt.Println(data)
+	ans := deser.deserialize(data)
+	fmt.Print(ans)
+
+}
+
+type Codec struct {
+	vs []string
+}
+
+func Constructor() Codec {
+	return Codec{}
+}
+
+// Serializes a tree to a single string.
+func (this *Codec) serialize(root *TreeNode) string {
+	ds := this.doSerialize(root)
+	return strings.Join(ds, ",")
+}
+
+func (this *Codec) doSerialize(root *TreeNode) []string {
+	if root == nil {
+		return []string{""}
+	}
+	ret := []string{strconv.Itoa(root.Val)}
+	ret = append(ret, this.serialize(root.Left))
+	ret = append(ret, this.serialize(root.Right))
+	return ret
+}
+
+// Deserializes your encoded data to tree.
+func (this *Codec) deserialize(data string) *TreeNode {
+	this.vs = strings.Split(data, ",")
+	return this.doDeserialize()
+}
+func (this *Codec) doDeserialize() *TreeNode {
+	if this.vs[0] == "" {
+		this.vs = this.vs[1:]
+		return nil
+	}
+
+	v, _ := strconv.Atoi(this.vs[0])
+	this.vs = this.vs[1:]
+	n := &TreeNode{
+		Val:   v,
+		Left:  this.doDeserialize(),
+		Right: this.doDeserialize(),
+	}
+	return n
 }
 
 func invertTree(root *TreeNode) *TreeNode {
@@ -289,14 +351,14 @@ type node struct {
 	pre   *node
 }
 
-func Constructor(capacity int) LRUCache {
-	return LRUCache{
-		capacity,
-		make(map[int]*node, capacity),
-		&node{},
-		&node{},
-	}
-}
+//func Constructor(capacity int) LRUCache {
+//	return LRUCache{
+//		capacity,
+//		make(map[int]*node, capacity),
+//		&node{},
+//		&node{},
+//	}
+//}
 
 func (this *LRUCache) Get(key int) int {
 	var n *node
