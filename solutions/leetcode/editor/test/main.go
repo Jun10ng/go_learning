@@ -23,23 +23,43 @@ type Node struct {
 }
 
 func main() {
-	root := &TreeNode{Val: 1}
-	r := &TreeNode{Val: 2}
-	root.Right = r
+	pre := []int{1, 2}
+	in := []int{2, 1}
+	root := buildTree(pre, in)
+	fmt.Println(root)
 
-	l := &TreeNode{Val: 3}
-	root.Left = l
+}
 
-	r2 := &TreeNode{Val: 4}
-	l.Right = r2
-
-	ser := Constructor()
-	deser := Constructor()
-	data := ser.serialize(root)
-	fmt.Println(data)
-	ans := deser.deserialize(data)
-	fmt.Print(ans)
-
+// 前序遍历 preorder = [3,9,20,15,7]
+//中序遍历 inorder = [9,3,15,20,7]
+func buildTree(preorder []int, inorder []int) *TreeNode {
+	build := func(preorder []int, inorder []int) *TreeNode {
+		return nil
+	}
+	build = func(pre []int, in []int) *TreeNode {
+		if len(pre) == 0 {
+			return nil
+		}
+		r := &TreeNode{
+			Val: pre[0],
+		}
+		if len(in) == 1 {
+			return r
+		}
+		idx := findIdx(in, pre[0]) // 左子树+根节点 节点数
+		r.Left = build(pre[1:idx+1], in[:idx])
+		r.Right = build(pre[idx+1:], in[idx+1:])
+		return r
+	}
+	return build(preorder, inorder)
+}
+func findIdx(s []int, e int) int {
+	for i, ie := range s {
+		if ie == e {
+			return i
+		}
+	}
+	return -1
 }
 
 type Codec struct {
