@@ -99,7 +99,6 @@ func (this *Codec)doDeserialize() *TreeNode{
 		this.vs = this.vs[1:]
 		return nil
 	}
-
 	v,_ := strconv.Atoi(this.vs[0])
 	this.vs =this.vs[1:]
 	n := &TreeNode{
