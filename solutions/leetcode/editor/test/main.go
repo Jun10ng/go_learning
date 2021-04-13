@@ -23,11 +23,52 @@ type Node struct {
 }
 
 func main() {
-	pre := []int{1, 2}
-	in := []int{2, 1}
-	root := buildTree(pre, in)
-	fmt.Println(root)
+	fmt.Println(permute([]int{2, 2, 3}))
+	//"dqveijaz"
+}
+func permute(nums []int) [][]int {
+	sort.Ints(nums)
+	ans := [][]int{}
+	vis := make([]bool, len(nums))
+	trace := func([]int) {}
+	trace = func(cur []int) {
+		if len(cur) == len(nums) {
+			cpy := make([]int, len(nums))
+			copy(cpy, cur)
+			ans = append(ans, cpy)
+			cur = cur[:0]
+			return
+		}
+		for i := 0; i < len(nums); i++ {
+			if i > 0 && nums[i] == nums[i-1] && vis[i-1] {
+				continue
+			}
+			if !vis[i] {
+				vis[i] = true
+				trace(append(cur, nums[i]))
+				vis[i] = false
+			}
+		}
+	}
+	trace([]int{})
+	return ans
+}
 
+func fnc2(s string, indices []int) string {
+	return fnc(strings.Split(s, ""), indices)
+}
+func fnc(s []string, indices []int) string {
+	tail := len(s) - 1
+	for tail >= 0 {
+		cur := indices[tail]
+		if cur != tail {
+			s[cur], s[tail] = s[tail], s[cur]
+			indices[cur], indices[tail] = indices[tail], indices[cur]
+		} else {
+			tail--
+		}
+	}
+	return strings.Join(s, "")
 }
 
 // 前序遍历 preorder = [3,9,20,15,7]
