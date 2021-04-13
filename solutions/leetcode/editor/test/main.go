@@ -23,9 +23,36 @@ type Node struct {
 }
 
 func main() {
-	fmt.Println(permute([]int{2, 2, 3}))
+	fmt.Println(subsets([]int{9, 0, 3, 5, 7}))
 	//"dqveijaz"
 }
+func subsets(nums []int) [][]int {
+	ret := make([][]int, 0)
+	ln := len(nums)
+	vis := make([]bool, len(nums))
+	doSubSet := func(set []int, begin int) {}
+	doSubSet = func(set []int, begin int) {
+		if len(set) <= ln {
+			cpy := make([]int, len(set))
+			copy(cpy, set)
+			ret = append(ret, cpy)
+		}
+		if len(set) == ln {
+			return
+		}
+
+		for i := begin; i < len(nums); i++ {
+			if !vis[i] {
+				vis[i] = true
+				doSubSet(append(set, nums[i]), i+1)
+				vis[i] = false
+			}
+		}
+	}
+	doSubSet([]int{}, 0)
+	return ret
+}
+
 func permute(nums []int) [][]int {
 	sort.Ints(nums)
 	ans := [][]int{}

@@ -24,24 +24,29 @@ package main
 //leetcode submit region begin(Prohibit modification and deletion)
 
 func subsets(nums []int) [][]int {
-	ans := &[][]int{}
-	e := &[]int{}
+	ret := make([][]int,0)
+	ln := len(nums)
+	vis := make([]bool,len(nums))
+	doSubSet := func(set []int,begin int) {}
+	doSubSet = func(set []int,begin int) {
+		if len(set) <= ln{
+			cpy:=make([]int,len(set))
+			copy(cpy,set)
+			ret = append(ret,cpy)
+		}
+		if len(set) == ln {
+			return
+		}
 
-	trace(ans,e,nums,0)
-	return *ans
-}
-
-func trace(ans *[][]int,e *[]int, nums []int, begin int)  {
-	if len(*e)<= len(nums){
-		cp := make([]int,len(*e))
-		copy(cp,*e)
-		*ans = append(*ans,cp)
+		for i:=begin;i<len(nums);i++{
+			if !vis[i]{
+				vis[i] = true
+				doSubSet(append(set,nums[i]),i+1)
+				vis[i] = false
+			}
+		}
 	}
-	for i:=begin;i<len(nums);i++ {
-		*e = append(*e,nums[i])
-		trace(ans,e,nums,i+1)
-		*e = (*e)[:len(*e)-1]
-	}
+	doSubSet([]int{},0)
+	return ret
 }
-
 //leetcode submit region end(Prohibit modification and deletion)
