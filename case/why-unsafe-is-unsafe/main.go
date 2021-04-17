@@ -41,12 +41,10 @@ func StringToByte(k *string) []byte {
 func main() {
 	decryptContent := "/AvYEjm4g6xJ3LVrk2/Adksdfsdfssssssss"
 	iv := decryptContent[0:16]
-	xx := decryptContent[0:23]
 	key := decryptContent[23:24]
 
-	fmt.Println(&iv)
-	fmt.Println(&xx)
-	fmt.Println(&key)
+	//fmt.Println(&iv)
+	//fmt.Println(&key)
 	ivBytes := StringToByte(&iv)
 	keyBytes := StringToByte(&key)
 	fmt.Println(string(ivBytes))
