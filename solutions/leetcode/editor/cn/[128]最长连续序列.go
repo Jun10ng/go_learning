@@ -42,6 +42,7 @@ func longestConsecutive(nums []int) int {
 		if _,exist := pre[e];exist {
 			continue
 		}
+		// 连续，找e+1和e-1
 		if prei,ok := pre[e+1];ok{
 			u.Union(i,prei)
 		}
@@ -58,7 +59,7 @@ type UnionFindSet struct {
 	Nums []int
 	Parent []int
 	Rank   []int
-	LC int
+	LC int  // 最大长度
 }
 func NewUnionFindSet(nums []int) *UnionFindSet {
 	m := len(nums)

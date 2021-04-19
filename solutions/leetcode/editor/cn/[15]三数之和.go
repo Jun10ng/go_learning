@@ -46,11 +46,6 @@ import "sort"
 func threeSum(nums []int) [][]int {
 	sort.Ints(nums)
 	ret := make([][]int,0)
-	//m := make(map[int]int,len(nums))
-	//for index:=0;index<len(nums);index++{
-	//	value := nums[index]
-	//	m[value] = index
-	//}
 
 	for i:=0;i<len(nums);i++ {
 		if nums[i]>0 {

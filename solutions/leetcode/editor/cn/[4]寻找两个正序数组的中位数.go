@@ -30,7 +30,7 @@ package main
 // 👍 3063 👎 0
 
 //leetcode submit region begin(Prohibit modification and deletion)
-//这道题的实质是取两个数组的第K个最小值
+// 这道题的实质是取两个数组的第K个最小值
 // 长度为偶数时，就是第K小和第K+1小值 相加除二
 // 如果使用双指针的解法没法解决两个中位数都在一个数组内
 func findMedianSortedArrays(nums1 []int, nums2 []int) float64 {
@@ -38,18 +38,18 @@ func findMedianSortedArrays(nums1 []int, nums2 []int) float64 {
 		i,j := 0,0
 		for {
 			//某个序列为空
-			if i == len(nums1){
+			if 0 == len(nums1){
 				return float64(nums2[j + k -1])
 			}
-			if j == len(nums2){
+			if 0 == len(nums2){
 				return float64(nums1[i + k -1])
 			}
 			if k==1{
 				return float64(min2(nums1[i],nums2[j]))
 			}
-			halfK := k/2-1
-			newi := min2(i + halfK,len(nums1)-1)
-			newj := min2(j + halfK,len(nums2)-1)
+			halfK := k/2
+			newi := min2(i + halfK+1,len(nums1)-1)
+			newj := min2(j + halfK+1,len(nums2)-1)
 			if nums1[newi]<nums2[newj]{
 				k = k- (newi - i + 1)
 				i = newi + 1

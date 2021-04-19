@@ -63,7 +63,7 @@ type UnionFindSet struct {
 	M, N, Cnt int
 	Grid      [][]int
 	Parent    []int
-	Rank      []int //深度
+	Rank      []int //省份内城市大小个数
 }
 
 func NewUnionFindSet(g [][]int) *UnionFindSet {
@@ -110,7 +110,7 @@ func (u *UnionFindSet) Union(x, y int) {
 		} else {
 			// 两个节点深度相同，选择让rooty指向rootx，rootx深度+1
 			u.Parent[rooty] = rootx
-			u.Rank[rootx]++
+			u.Rank[rootx]+= u.Rank[rooty]
 		}
 		u.Cnt--
 	}
